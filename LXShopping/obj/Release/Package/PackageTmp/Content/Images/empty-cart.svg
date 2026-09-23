@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="280" viewBox="0 0 360 280" role="img" aria-label="购物车是空的">
+  <defs>
+    <linearGradient id="ec" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5B4BFF"/>
+      <stop offset="1" stop-color="#12C2B4"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="180" cy="238" rx="126" ry="20" fill="#E7EBF7"/>
+  <g fill="none" stroke="url(#ec)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M60 70h26l24 100h116"/>
+    <path d="M96 100h190l-18 58H108"/>
+    <circle cx="132" cy="206" r="13"/>
+    <circle cx="216" cy="206" r="13"/>
+  </g>
+  <g fill="#C9D2E8">
+    <circle cx="286" cy="74" r="9"/>
+    <circle cx="312" cy="52" r="5"/>
+    <circle cx="268" cy="40" r="6"/>
+  </g>
+  <g fill="none" stroke="#DDE3F2" stroke-width="5" stroke-linecap="round">
+    <path d="M40 150h-14M44 178h-20"/>
+  </g>
+</svg>

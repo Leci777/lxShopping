@@ -1,0 +1,140 @@
+@model PagedList.IPagedList<LXShopping.Models.Product>
+@{
+    Layout = "~/Views/Shared/_Layout-Admin.cshtml";
+    ViewBag.Title = "商品管理";
+    ViewBag.PageTitle = "商品管理";
+    ViewBag.PageSub = "商品上下架、库存与价格维护";
+
+    var categories = ViewBag.ProductCategories as IList<LXShopping.Models.ProductCategory>
+                     ?? new List<LXShopping.Models.ProductCategory>();
+    var keyword = ViewBag.Keyword as string;
+    var products = Model;
+}
+<div class="lx-page-head">
+    <div>
+        <h2>商品管理</h2>
+        <p>共 @products.TotalItemCount 件商品@(string.IsNullOrWhiteSpace(keyword) ? "" : "，搜索关键词「" + keyword + "」")</p>
+    </div>
+    <div class="lx-actions">
+        <form class="lx-input-icon" action="@Url.Action("Products", "Admin")" method="get" style="width:260px;">
+            <span class="ico">@LXIcon.Search(18)</span>
+            <input class="lx-input" type="search" name="product" value="@keyword" placeholder="搜索商品名称 / 制造商 / 类别" />
+        </form>
+        <a class="lx-btn lx-btn-primary lx-btn-sm" href="@Url.Action("ProductCreate", "Admin")">@LXIcon.Plus(15) 新增商品</a>
+    </div>
+</div>
+
+<!-- 上面是商品类别，可以在这里增删改 -->
+<div class="lx-card mb-3">
+    <div class="lx-card-head">
+        <h3>商品类别</h3>
+        <span class="text-muted" style="font-size:12.5px;">类别下还有商品时不可删除</span>
+    </div>
+    <div class="lx-card-body">
+        <div class="lx-catlist mb-3">
+            @foreach (var c in categories)
+            {
+                <div class="lx-catitem" data-scope>
+                    <input type="text" data-category-name value="@c.Name" maxlength="20" aria-label="类别名称" />
+                    <span class="cnt">@c.OnShelfCount 件</span>
+                    <button class="lx-act" type="button" data-admin-category-rename="@c.Id" title="保存名称">@LXIcon.Check(14)</button>
+                    <button class="lx-act danger" type="button" data-admin-category-delete="@c.Id" title="删除类别">@LXIcon.Trash(14)</button>
+                </div>
+            }
+        </div>
+
+        <div class="d-flex align-items-center" style="gap:10px;flex-wrap:wrap;">
+            <input class="lx-input" type="text" id="newCategoryName" maxlength="20" placeholder="输入新类别名称，例如：宠物用品" style="max-width:280px;" />
+            <button class="lx-btn lx-btn-outline lx-btn-sm" type="button" data-admin-category-create>@LXIcon.Plus(15) 创建类别</button>
+        </div>
+    </div>
+</div>
+
+<!-- 下面是商品列表，带搜索和分页 -->
+<div class="lx-card">
+    <div class="lx-card-head">
+        <h3>商品列表</h3>
+        <span class="text-muted" style="font-size:12.5px;">第 @products.PageNumber / @products.PageCount 页</span>
+    </div>
+    <div class="lx-card-body">
+        @if (products.Any())
+        {
+            <div class="lx-table-wrap">
+                <table class="lx-table">
+                    <thead>
+                        <tr>
+                            <th style="width:76px;">图片</th>
+                            <th>商品信息</th>
+                            <th>类别</th>
+                            <th style="text-align:right;">售价</th>
+                            <th style="text-align:right;">库存</th>
+                            <th style="text-align:right;">销量</th>
+                            <th>状态</th>
+                            <th style="text-align:right;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in products)
+                        {
+                            <tr>
+                                <td>
+                                    <img class="thumb" src="@Url.Action("GetImage", "Home", new { id = p.Id })" alt="@p.Name" />
+                                </td>
+                                <td>
+                                    <a class="strong" href="@Url.Action("ProductEdit", "Admin", new { id = p.Id })">@p.Name</a>
+                                    <div class="text-muted" style="font-size:12px;">@p.Made · 编号 LX-@p.Id.ToString("D5")</div>
+                                </td>
+                                <td>
+                                    @if (p.ProductCategory != null)
+                                    {
+                                        <span class="lx-badge lx-badge-primary">@p.ProductCategory.Name</span>
+                                    }
+                                </td>
+                                <td style="text-align:right;" class="strong nowrap">@LXHelper.Money(p.Price)</td>
+                                <td style="text-align:right;" class="nowrap">
+                                    @if (p.Amount <= 0)
+                                    {
+                                        <span class="lx-badge lx-badge-sale">已售罄</span>
+                                    }
+                                    else if (p.Amount <= 20)
+                                    {
+                                        <span class="lx-badge lx-badge-warn">@p.Amount</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@p.Amount</span>
+                                    }
+                                </td>
+                                <td style="text-align:right;">@p.Sales</td>
+                                <td>
+                                    <span class="lx-badge @(p.IsPublished ? "lx-badge-ok" : "lx-badge-grey")">@(p.IsPublished ? "已上架" : "已下架")</span>
+                                </td>
+                                <td style="text-align:right;">
+                                    <div class="lx-actions" style="justify-content:flex-end;">
+                                        <a class="lx-act" href="@Url.Action("ProductDetail", "Home", new { id = p.Id })" target="_blank" rel="noopener">@LXIcon.Eye(14) 预览</a>
+                                        <a class="lx-act" href="@Url.Action("ProductEdit", "Admin", new { id = p.Id })">@LXIcon.Edit(14) 编辑</a>
+                                        <button class="lx-act warn" type="button" data-admin-product-toggle="@p.Id">
+                                            @(p.IsPublished ? "下架" : "上架")
+                                        </button>
+                                        <button class="lx-act danger" type="button" data-admin-product-delete="@p.Id">@LXIcon.Trash(14)</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @Html.LxPager(products, new { product = keyword })
+        }
+        else
+        {
+            <div class="lx-empty">
+                <img src="@Url.Content("~/Content/Images/empty-box.svg")" alt="暂无商品" />
+                <h4>没有找到商品</h4>
+                <p>@(string.IsNullOrWhiteSpace(keyword) ? "还没有上架任何商品，先添加一件吧。" : "换个关键词再试试。")</p>
+                <a class="lx-btn lx-btn-primary" href="@Url.Action("ProductCreate", "Admin")">新增商品</a>
+            </div>
+        }
+    </div>
+</div>

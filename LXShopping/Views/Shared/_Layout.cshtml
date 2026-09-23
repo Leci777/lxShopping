@@ -1,0 +1,239 @@
+@using System.Linq
+@using LXShopping.Models
+@{
+    var memberId = Session["memberid"] as int?;
+    var isMember = User != null && User.Identity.IsAuthenticated && memberId.HasValue;
+    var nick = Session["name"] as string;
+    var member = (Member)null;
+    var cartCount = 0;
+
+    if (isMember)
+    {
+        using (var navDb = new LXShoppingContext())
+        {
+            var mid = memberId.Value;
+            member = navDb.Members.FirstOrDefault(m => m.Id == mid);
+            cartCount = navDb.Carts.Where(c => c.Member.Id == mid).Sum(c => (int?)c.Amount) ?? 0;
+            if (member != null && string.IsNullOrWhiteSpace(nick))
+            {
+                nick = string.IsNullOrWhiteSpace(member.Nickname) ? member.Name : member.Nickname;
+            }
+        }
+    }
+
+    var controller = (ViewContext.RouteData.Values["controller"] ?? "").ToString();
+    var action = (ViewContext.RouteData.Values["action"] ?? "").ToString();
+    var isHome = controller == "Home" && action == "Index";
+    var isList = controller == "Home" && action == "ProductList";
+    var isDetail = controller == "Home" && action == "ProductDetail";
+    var isCart = controller == "Cart";
+    var isCenter = controller == "AboutMember";
+}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#5B4BFF" />
+    <meta name="description" content="LX 优选商城 —— 正品保障、极速发货、7 天无理由退换的精选好物在线商城。" />
+    <title>@(ViewBag.Title != null ? ViewBag.Title + " - LX 优选商城" : "LX 优选商城 · 精选好物，优选生活")</title>
+    <link rel="icon" href="@Url.Content("~/favicon.ico")" />
+    <link rel="apple-touch-icon" href="@Url.Content("~/Content/Images/lx-mark-256.png")" />
+    @Styles.Render("~/Content/css")
+    @RenderSection("styles", required: false)
+</head>
+<body>
+    <div class="lx-topbar">
+        <div class="lx-container">
+            <div class="left">
+                <span>欢迎来到 LX 优选商城</span>
+                <span class="sep">|</span>
+                <span>正品保障 · 极速发货 · 7 天无理由退换</span>
+            </div>
+            <div class="right">
+                <span>客服热线 023-6666 6666</span>
+                <span class="sep">|</span>
+                @if (isMember)
+                {
+                    <a href="@Url.Action("Index", "AboutMember")">@nick</a>
+                    <span class="sep">|</span>
+                    <a href="@Url.Action("Logout", "Member")">退出</a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "Member")">登录</a>
+                    <span class="sep">|</span>
+                    <a href="@Url.Action("Register", "Member")">免费注册</a>
+                }
+                <span class="sep">|</span>
+                <a href="@Url.Action("Login", "Admin")">管理入口</a>
+            </div>
+        </div>
+    </div>
+
+    <header class="lx-header">
+        <div class="lx-container">
+            <a class="lx-brand" href="@Url.Action("Index", "Home")">
+                <img class="mark" src="@Url.Content("~/Content/Images/lx-mark.svg")" alt="LX 优选商城" />
+                <span class="txt">
+                    <b>LX 优选</b>
+                    <span>SHOPPING</span>
+                </span>
+            </a>
+
+            <nav class="lx-nav">
+                <a href="@Url.Action("Index", "Home")" class="@(isHome ? "active" : "")">首页</a>
+                <a href="@Url.Action("ProductList", "Home")" class="@(isList || isDetail ? "active" : "")">全部商品</a>
+                <a href="@Url.Action("ProductList", "Home", new { sort = "sales" })">热销榜</a>
+                <a href="@Url.Action("Index", "AboutMember", new { tab = "orders" })" class="@(isCenter ? "active" : "")">我的订单</a>
+            </nav>
+
+            <form class="lx-search" action="@Url.Action("Index", "Home")" method="get" role="search">
+                <span class="ico">@LXIcon.Search(18)</span>
+                <input type="search" name="search" value="@(ViewBag.Keyword as string)" placeholder="搜索商品名称 / 品牌 / 类别" aria-label="搜索商品" />
+                <button class="go" type="submit">搜索</button>
+            </form>
+
+            <div class="lx-header-actions">
+                <a class="lx-cart-btn" href="@Url.Action("Index", "Cart")" title="购物车">
+                    @LXIcon.Cart(19)
+                    <span class="d-none d-md-inline">购物车</span>
+                    <span class="lx-cart-count">@(cartCount > 99 ? "99+" : cartCount.ToString())</span>
+                </a>
+
+                @if (isMember)
+                {
+                    <div class="dropdown lx-user">
+                        <button class="lx-user-toggle" type="button" id="lxUserMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="lx-avatar">
+                                @if (member != null && member.ImageData != null)
+                                {
+                                    <img src="@Url.Action("GetImage", "Member", new { id = member.Id })" alt="头像" />
+                                }
+                                else
+                                {
+                                    @(member == null ? "L" : member.Initial)
+                                }
+                            </span>
+                            <span class="d-none d-lg-inline">@nick</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right lx-dropdown" aria-labelledby="lxUserMenu">
+                            <div class="head">
+                                <b>@nick</b>
+                                <span>@(member != null ? member.Email : "")</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="@Url.Action("Index", "AboutMember")">@LXIcon.User(17) 个人中心</a>
+                            <a class="dropdown-item" href="@Url.Action("Index", "AboutMember", new { tab = "orders" })">@LXIcon.Orders(17) 我的订单</a>
+                            <a class="dropdown-item" href="@Url.Action("Index", "AboutMember", new { tab = "address" })">@LXIcon.Location(17) 收货地址</a>
+                            <a class="dropdown-item" href="@Url.Action("Index", "AboutMember", new { tab = "security" })">@LXIcon.Shield(17) 账号安全</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="@Url.Action("Logout", "Member")">@LXIcon.Logout(17) 退出登录</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="lx-btn-group">
+                        <a class="lx-btn lx-btn-outline lx-btn-sm d-none d-lg-inline-flex" href="@Url.Action("Login", "Member")">登录</a>
+                        <a class="lx-btn lx-btn-primary lx-btn-sm" href="@Url.Action("Register", "Member")">免费注册</a>
+                    </div>
+                }
+
+                <button class="lx-burger" type="button" data-drawer-open aria-label="打开菜单">@LXIcon.Menu(22)</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="lx-drawer-mask" data-drawer-close></div>
+    <aside class="lx-drawer" aria-label="移动端导航">
+        <div class="head">
+            <a class="lx-brand" href="@Url.Action("Index", "Home")">
+                <img class="mark" src="@Url.Content("~/Content/Images/lx-mark.svg")" alt="LX" />
+                <span class="txt"><b>LX 优选</b><span>SHOPPING</span></span>
+            </a>
+            <button class="lx-btn lx-btn-icon lx-btn-sm lx-btn-outline" type="button" data-drawer-close aria-label="关闭">@LXIcon.Close(18)</button>
+        </div>
+        <div class="searchbox">
+            <form action="@Url.Action("Index", "Home")" method="get">
+                <div class="lx-input-icon">
+                    <span class="ico">@LXIcon.Search(18)</span>
+                    <input class="lx-input" type="search" name="search" placeholder="搜索商品" />
+                </div>
+            </form>
+        </div>
+        <nav>
+            <a href="@Url.Action("Index", "Home")" class="@(isHome ? "active" : "")">@LXIcon.Home(18) 首页</a>
+            <a href="@Url.Action("ProductList", "Home")" class="@(isList || isDetail ? "active" : "")">@LXIcon.Grid(18) 全部商品</a>
+            <a href="@Url.Action("ProductList", "Home", new { sort = "sales" })">@LXIcon.Chart(18) 热销榜</a>
+            <a href="@Url.Action("Index", "Cart")" class="@(isCart ? "active" : "")">@LXIcon.Cart(18) 购物车</a>
+            <a href="@Url.Action("Index", "AboutMember")" class="@(isCenter ? "active" : "")">@LXIcon.User(18) 个人中心</a>
+        </nav>
+        <div class="foot">
+            @if (isMember)
+            {
+                <a class="lx-btn lx-btn-outline lx-btn-block" href="@Url.Action("Logout", "Member")">退出登录</a>
+            }
+            else
+            {
+                <a class="lx-btn lx-btn-primary lx-btn-block" href="@Url.Action("Login", "Member")">登录 / 注册</a>
+            }
+        </div>
+    </aside>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="lx-footer">
+        <div class="lx-container">
+            <div class="lx-footer-top">
+                <div>
+                    <div class="brand">
+                        <img src="@Url.Content("~/Content/Images/lx-mark.svg")" alt="LX" />
+                        <div><b>LX 优选</b><span>SHOPPING</span></div>
+                    </div>
+                    <p class="about">
+                        LX 优选商城专注为用户甄选高性价比好物，覆盖数码、家电、服饰、美妆、食品等八大品类。正品保障、极速发货、7 天无理由退换，让每一次购物都安心。
+                    </p>
+                </div>
+                <div>
+                    <h5>购物指南</h5>
+                    <a href="@Url.Action("Register", "Member")">注册新账号</a>
+                    <a href="@Url.Action("Login", "Member")">会员登录</a>
+                    <a href="@Url.Action("ProductList", "Home")">全部商品</a>
+                    <a href="@Url.Action("Index", "Cart")">购物车</a>
+                </div>
+                <div>
+                    <h5>帮助中心</h5>
+                    <a href="@Url.Action("About", "Home")">关于我们</a>
+                    <a href="@Url.Action("Index", "AboutMember", new { tab = "orders" })">订单查询</a>
+                    <a href="@Url.Action("Index", "AboutMember", new { tab = "address" })">收货地址</a>
+                    <a href="@Url.Action("Index", "AboutMember", new { tab = "security" })">账号安全</a>
+                </div>
+                <div>
+                    <h5>联系我们</h5>
+                    <div class="contact-item">@LXIcon.Phone(16)<span>023-6666 6666（09:00 - 21:00）</span></div>
+                    <div class="contact-item">@LXIcon.Location(16)<span>重庆市合川区人民公园</span></div>
+                    <div class="contact-item">@LXIcon.Spark(16)<span>lx2042426989@163.com</span></div>
+                </div>
+            </div>
+            <div class="lx-footer-bottom">
+                <span>© @DateTime.Now.Year LX 优选商城 · LX Shopping. All rights reserved.</span>
+                <span>本项目为课程实践作品，谢谢</span>
+            </div>
+        </div>
+    </footer>
+
+    <div class="lx-toasts"></div>
+    @Html.Partial("_Toast")
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/ajax")
+    <script src="@Url.Content("~/Content/lx/lx.js")"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

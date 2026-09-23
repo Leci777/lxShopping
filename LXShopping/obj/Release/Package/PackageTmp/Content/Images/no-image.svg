@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" role="img" aria-label="暂无图片">
+  <defs>
+    <linearGradient id="ni" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EEF1FA"/>
+      <stop offset="1" stop-color="#E2E8F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#ni)"/>
+  <g fill="none" stroke="#B9C3DA" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="120" y="140" width="160" height="120" rx="14"/>
+    <path d="M120 216l38-34 34 30 30-26 58 50"/>
+    <circle cx="252" cy="176" r="13"/>
+  </g>
+  <text x="200" y="312" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="20" fill="#B9C3DA">暂无图片</text>
+</svg>

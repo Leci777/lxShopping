@@ -1,0 +1,117 @@
+@using System.Linq
+@{
+    var adminName = Session["adminname"] as string;
+    if (string.IsNullOrWhiteSpace(adminName)) { adminName = "管理员"; }
+    var adminRole = Session["adminrole"] as string;
+    if (string.IsNullOrWhiteSpace(adminRole)) { adminRole = "运营人员"; }
+
+    var pageTitle = ViewBag.PageTitle as string;
+    if (string.IsNullOrWhiteSpace(pageTitle)) { pageTitle = "仪表盘"; }
+    var pageSub = ViewBag.PageSub as string;
+    if (string.IsNullOrWhiteSpace(pageSub)) { pageSub = "LX 优选商城 · 运营后台"; }
+
+    var action = (ViewContext.RouteData.Values["action"] ?? "").ToString().ToLowerInvariant();
+    var isDashboard = action == "index";
+    var isProducts = action == "products" || action == "productcreate" || action == "productedit";
+    var isUsers = action == "users" || action == "usercreate" || action == "useredit";
+    var isOrders = action == "ordermanagement" || action == "orderdetails";
+    var isAbout = action == "aboutme";
+}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#0E1526" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@(ViewBag.Title != null ? ViewBag.Title + " - LX 管理后台" : "LX 管理后台")</title>
+    <link rel="icon" href="@Url.Content("~/favicon.ico")" />
+    <link rel="apple-touch-icon" href="@Url.Content("~/Content/Images/lx-mark-256.png")" />
+    @Styles.Render("~/Content/admincss")
+    @RenderSection("styles", required: false)
+</head>
+<body class="lx-admin-body">
+    <div class="lx-admin-shell">
+        <aside class="lx-admin-side" aria-label="后台导航">
+            <a class="lx-admin-brand" href="@Url.Action("Index", "Admin")">
+                <img src="@Url.Content("~/Content/Images/lx-mark.svg")" alt="LX" />
+                <div>
+                    <b>LX 优选</b>
+                    <span>ADMIN CONSOLE</span>
+                </div>
+            </a>
+
+            <nav class="lx-admin-nav">
+                <div class="grp">概览</div>
+                <a class="item @(isDashboard ? "active" : "")" href="@Url.Action("Index", "Admin")">
+                    @LXIcon.Chart(18) 数据仪表盘
+                </a>
+
+                <div class="grp">商品</div>
+                <a class="item @(isProducts ? "active" : "")" href="@Url.Action("Products", "Admin")">
+                    @LXIcon.Box(18) 商品管理
+                </a>
+
+                <div class="grp">交易</div>
+                <a class="item @(isOrders ? "active" : "")" href="@Url.Action("Ordermanagement", "Admin")">
+                    @LXIcon.Truck(18) 订单管理
+                </a>
+
+                <div class="grp">会员</div>
+                <a class="item @(isUsers ? "active" : "")" href="@Url.Action("Users", "Admin")">
+                    @LXIcon.Users(18) 用户管理
+                </a>
+
+                <div class="grp">系统</div>
+                <a class="item @(isAbout ? "active" : "")" href="@Url.Action("AboutMe", "Admin")">
+                    @LXIcon.Info(18) 关于项目
+                </a>
+                <a class="item" href="@Url.Action("Index", "Home")" target="_blank" rel="noopener">
+                    @LXIcon.Eye(18) 访问前台
+                </a>
+            </nav>
+
+            <div class="lx-admin-side-foot">
+                <div>LX Shopping v1.0</div>
+                <div class="mt-2">
+                    <a href="@Url.Action("Logout", "Admin")">退出登录</a>
+                </div>
+            </div>
+        </aside>
+
+        <div class="lx-admin-mask" data-admin-drawer-close></div>
+
+        <div class="lx-admin-main">
+            <header class="lx-admin-topbar">
+                <button class="lx-admin-burger" type="button" data-admin-drawer-open aria-label="打开导航">@LXIcon.Menu(20)</button>
+                <div class="title">
+                    <b>@pageTitle</b>
+                    <span>@pageSub</span>
+                </div>
+                <div class="spacer"></div>
+                <span class="chip hide-sm">@LXIcon.Shield(15) @adminRole</span>
+                <div class="who">
+                    <span class="lx-avatar">@(adminName.Substring(0, 1))</span>
+                    <span class="d-none d-md-inline font-weight-bold">@adminName</span>
+                </div>
+                <a class="lx-btn lx-btn-outline lx-btn-sm" href="@Url.Action("Logout", "Admin")">@LXIcon.Logout(16) 退出</a>
+            </header>
+
+            <div class="lx-admin-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-toasts"></div>
+    @Html.Partial("_Toast")
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/ajax")
+    <script src="@Url.Content("~/Content/lx/lx.js")"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,464 @@
+@model LXShopping.Models.MemberCenterViewModel
+@{
+    ViewBag.Title = "个人中心";
+    var member = Model.Member;
+    var tab = (ViewBag.ActiveTab as string) ?? "profile";
+    var orders = Model.OrderHeaders ?? new List<LXShopping.Models.OrderHeader>();
+    var addresses = Model.Addresses ?? new List<LXShopping.Models.MemberAddress>();
+    var nick = string.IsNullOrWhiteSpace(member.Nickname) ? member.Name : member.Nickname;
+
+    Func<string, string> tabUrl = t => Url.Action("Index", "AboutMember", new { tab = t });
+}
+
+<div class="lx-crumb">
+    <div class="lx-container">
+        <a href="@Url.Action("Index", "Home")">首页</a>
+        <span class="sep">/</span>
+        <span class="now">个人中心</span>
+    </div>
+</div>
+
+<div class="lx-section">
+    <div class="lx-container">
+        <div class="lx-center">
+            <!-- 左边这一块是会员的头像和基本资料 -->
+            <aside class="lx-side">
+                <div class="lx-card">
+                    <div class="me">
+                        <span class="lx-avatar lx-avatar-lg">
+                            @if (member.ImageData != null && member.ImageData.Length > 0)
+                            {
+                                <img src="@Url.Action("GetImage", "Member", new { id = member.Id })" alt="头像" />
+                            }
+                            else
+                            {
+                                @member.Initial
+                            }
+                        </span>
+                        <b>@nick</b>
+                        <span>@member.Email</span>
+                        <div class="mt-2">
+                            <span class="lx-badge lx-badge-grad">LX 会员</span>
+                        </div>
+                    </div>
+                    <nav>
+                        <a class="@(tab == "profile" ? "active" : "")" href="@tabUrl("profile")">@LXIcon.User(17) 账号概览</a>
+                        <a class="@(tab == "orders" ? "active" : "")" href="@tabUrl("orders")">
+                            @LXIcon.Orders(17) 我的订单
+                            <span class="cnt">@orders.Count</span>
+                        </a>
+                        <a class="@(tab == "address" ? "active" : "")" href="@tabUrl("address")">@LXIcon.Location(17) 收货地址</a>
+                        <a class="@(tab == "settings" ? "active" : "")" href="@tabUrl("settings")">@LXIcon.Edit(17) 修改资料</a>
+                        <a class="@(tab == "security" ? "active" : "")" href="@tabUrl("security")">@LXIcon.Shield(17) 账号安全</a>
+                        <a href="@Url.Action("Logout", "Member")">@LXIcon.Logout(17) 退出登录</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- 右边是具体内容，显示哪块由上面选中的 tab 决定 -->
+            <div>
+                @if (tab == "orders")
+                {
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3>我的订单</h3>
+                            <span class="text-muted" style="font-size:13px;">共 @orders.Count 个订单 · 累计消费 @LXHelper.Money(Model.TotalSpent)</span>
+                        </div>
+                        <div class="lx-card-body">
+                            @if (orders.Any())
+                            {
+                                foreach (var o in orders)
+                                {
+                                    var details = o.OrderDetailItems == null ? new List<LXShopping.Models.OrderDetail>() : o.OrderDetailItems.ToList();
+                                    <div class="lx-card mb-3" style="box-shadow:none;">
+                                        <div class="lx-card-head" style="background:#FBFCFE;">
+                                            <div style="font-size:13px;">
+                                                <span class="now" style="font-weight:600;">订单号 @o.OrderNo</span>
+                                                <span class="text-muted"> · @o.BuyOn.ToString("yyyy-MM-dd HH:mm")</span>
+                                            </div>
+                                            <div class="d-flex align-items-center" style="gap:10px;">
+                                                <span class="lx-badge @(o.IsAllShipped ? "lx-badge-ok" : (o.HasUnshipped ? "lx-badge-warn" : "lx-badge-grey"))">@o.StatusText</span>
+                                                <span class="lx-price lx-price-sm">@LXHelper.Money(o.TotalPrice)</span>
+                                            </div>
+                                        </div>
+                                        <div class="lx-card-body">
+                                            @foreach (var d in details)
+                                            {
+                                                var pname = string.IsNullOrEmpty(d.ProductName)
+                                                    ? (d.Product == null ? "商品" : d.Product.Name)
+                                                    : d.ProductName;
+                                                <div class="lx-line" style="box-shadow:none;padding:10px 0;border:0;border-bottom:1px dashed var(--lx-line);border-radius:0;">
+                                                    <a class="thumb" style="width:64px;height:64px;" href="@Url.Action("ProductDetail", "Home", new { id = d.Product == null ? 0 : d.Product.Id })">
+                                                        <img src="@Url.Action("GetImage", "Home", new { id = d.Product == null ? 0 : d.Product.Id })" alt="@pname" />
+                                                    </a>
+                                                    <div>
+                                                        <a class="name" style="font-size:14px;" href="@Url.Action("ProductDetail", "Home", new { id = d.Product == null ? 0 : d.Product.Id })">@pname</a>
+                                                        <div class="meta">@LXHelper.Money(d.UnitPrice) × @d.Amount</div>
+                                                        <div class="meta">
+                                                            @if (d.IsShipped)
+                                                            {
+                                                                <span>快递单号 <b>@d.Shipmentnumber</b></span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>仓库正在打包，暂无单号</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div class="actions">
+                                                        <span class="lx-badge @(d.IsShipped ? "lx-badge-ok" : "lx-badge-warn")">@(d.IsShipped ? "已发货" : "待发货")</span>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            @if (o.MemberAddress != null)
+                                            {
+                                                <div class="lx-help mt-2">
+                                                    收货：@o.MemberAddress.ContactName · @o.MemberAddress.ContactPhoneNo · @o.MemberAddress.ContactAddress
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(o.Memo))
+                                            {
+                                                <div class="lx-help">备注：@o.Memo</div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="lx-empty">
+                                    <img src="@Url.Content("~/Content/Images/empty-box.svg")" alt="还没有订单" />
+                                    <h4>你还没有任何订单</h4>
+                                    <p>挑选喜欢的商品下单后，可在这里跟踪发货进度。</p>
+                                    <a class="lx-btn lx-btn-primary" href="@Url.Action("ProductList", "Home")">去逛逛</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else if (tab == "address")
+                {
+                    <div class="lx-card mb-3">
+                        <div class="lx-card-head">
+                            <h3>我的收货地址</h3>
+                            <span class="text-muted" style="font-size:13px;">已被历史订单使用的地址不可删除</span>
+                        </div>
+                        <div class="lx-card-body">
+                            @if (addresses.Any())
+                            {
+                                <div class="lx-grid lx-grid-2">
+                                    @foreach (var a in addresses)
+                                    {
+                                        <div class="lx-addr" style="cursor:default;">
+                                            <span class="nm">
+                                                @a.ContactName
+                                                <span class="lx-badge lx-badge-grey">@a.ContactPhoneNo</span>
+                                            </span>
+                                            <div class="ad">@a.ContactAddress</div>
+                                            <div class="lx-actions mt-3">
+                                                <button class="lx-act" type="button"
+                                                        data-addr-edit="@a.Id"
+                                                        data-name="@a.ContactName"
+                                                        data-phone="@a.ContactPhoneNo"
+                                                        data-address="@a.ContactAddress">
+                                                    @LXIcon.Edit(14) 编辑
+                                                </button>
+                                                <button class="lx-act danger" type="button" data-addr-delete="@a.Id">
+                                                    @LXIcon.Trash(14) 删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">还没有保存收货地址，在下方添加一个吧。</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3 id="addrFormTitle">新增收货地址</h3>
+                        </div>
+                        @using (Html.BeginForm("AddressSave", "AboutMember", FormMethod.Post, new { id = "addrForm" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" id="addrId" value="0" />
+                            <div class="lx-card-body">
+                                <div class="lx-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+                                    <div class="lx-field">
+                                        <label class="lx-label" for="ContactName">收件人姓名<span class="req">*</span></label>
+                                        <input class="lx-input" type="text" id="ContactName" name="ContactName" maxlength="40" placeholder="请输入收件人姓名" required />
+                                    </div>
+                                    <div class="lx-field">
+                                        <label class="lx-label" for="ContactPhoneNo">联系电话<span class="req">*</span></label>
+                                        <input class="lx-input" type="text" id="ContactPhoneNo" name="ContactPhoneNo" maxlength="25" placeholder="手机号或固定电话" required />
+                                    </div>
+                                    <div class="lx-field" style="grid-column:1 / -1;">
+                                        <label class="lx-label" for="ContactAddress">详细地址<span class="req">*</span></label>
+                                        <textarea class="lx-textarea" id="ContactAddress" name="ContactAddress" maxlength="200" placeholder="省 / 市 / 区 + 街道门牌号" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="lx-btn-group">
+                                    <button class="lx-btn lx-btn-primary" type="submit">保存地址</button>
+                                    <button class="lx-btn lx-btn-outline" type="button" id="addrReset">重置表单</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (tab == "settings")
+                {
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3>修改个人资料</h3>
+                        </div>
+                        @using (Html.BeginForm("MemberEdit", "AboutMember", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="lx-card-body">
+                                <div class="lx-upload mb-4">
+                                    <div class="preview" id="avatarPreview">
+                                        @if (member.ImageData != null && member.ImageData.Length > 0)
+                                        {
+                                            <img src="@Url.Action("GetImage", "Member", new { id = member.Id })" alt="头像" />
+                                        }
+                                        else
+                                        {
+                                            <span>暂无头像</span>
+                                        }
+                                    </div>
+                                    <div>
+                                        <label class="lx-btn lx-btn-outline lx-btn-sm pick">
+                                            选择图片
+                                            <input type="file" name="image" accept="image/*"
+                                                   data-upload-preview="#avatarPreview" data-upload-name="#avatarName" />
+                                        </label>
+                                        <div class="filename" id="avatarName">未选择文件</div>
+                                        <div class="lx-help">支持 JPG / PNG / GIF / WEBP，大小不超过 4MB。</div>
+                                    </div>
+                                </div>
+
+                                <div class="lx-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+                                    <div class="lx-field">
+                                        <label class="lx-label" for="Name">中文姓名<span class="req">*</span></label>
+                                        <input class="lx-input" type="text" id="Name" name="Name" value="@member.Name" maxlength="5" required />
+                                        <div class="lx-help">最多 5 个字</div>
+                                    </div>
+                                    <div class="lx-field">
+                                        <label class="lx-label" for="Nickname">用户名<span class="req">*</span></label>
+                                        <input class="lx-input" type="text" id="Nickname" name="Nickname" value="@member.Nickname" maxlength="10" required />
+                                        <div class="lx-help">最多 10 个字，将展示在页面右上角</div>
+                                    </div>
+                                    <div class="lx-field">
+                                        <label class="lx-label">注册邮箱</label>
+                                        <input class="lx-input" type="text" value="@member.Email" readonly />
+                                        <div class="lx-help">邮箱作为登录账号，暂不支持修改</div>
+                                    </div>
+                                    <div class="lx-field">
+                                        <label class="lx-label">注册时间</label>
+                                        <input class="lx-input" type="text" value="@member.RegisterOn.ToString("yyyy-MM-dd HH:mm")" readonly />
+                                    </div>
+                                </div>
+
+                                <button class="lx-btn lx-btn-primary" type="submit">保存修改</button>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (tab == "security")
+                {
+                    <div class="lx-card mb-3">
+                        <div class="lx-card-head">
+                            <h3>修改登录密码</h3>
+                        </div>
+                        @using (Html.BeginForm("ChangePassword", "Member", FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="lx-card-body" style="max-width:520px;">
+                                <div class="lx-field">
+                                    <label class="lx-label" for="OldPassword">当前密码<span class="req">*</span></label>
+                                    <div class="lx-input-icon">
+                                        <span class="ico">@LXIcon.Shield(18)</span>
+                                        <input class="lx-input" type="password" id="OldPassword" name="OldPassword"
+                                               autocomplete="current-password" placeholder="请输入当前登录密码" required />
+                                        <button type="button" class="act" data-toggle-pwd="#OldPassword" title="显示密码">@LXIcon.Eye(18)</button>
+                                    </div>
+                                </div>
+                                <div class="lx-field">
+                                    <label class="lx-label" for="NewPassword">新密码<span class="req">*</span></label>
+                                    <div class="lx-input-icon">
+                                        <span class="ico">@LXIcon.Spark(18)</span>
+                                        <input class="lx-input" type="password" id="NewPassword" name="NewPassword"
+                                               minlength="6" maxlength="20" autocomplete="new-password" placeholder="6 ~ 20 位新密码" required />
+                                    </div>
+                                </div>
+                                <div class="lx-field">
+                                    <label class="lx-label" for="ConfirmPassword">确认新密码<span class="req">*</span></label>
+                                    <div class="lx-input-icon">
+                                        <span class="ico">@LXIcon.Check(18)</span>
+                                        <input class="lx-input" type="password" id="ConfirmPassword" name="ConfirmPassword"
+                                               minlength="6" maxlength="20" autocomplete="new-password" placeholder="请再次输入新密码" required />
+                                    </div>
+                                </div>
+                                <button class="lx-btn lx-btn-primary" type="submit">确认修改</button>
+                                <div class="lx-help mt-3">为了账号安全，建议定期更换密码，且不要与其他网站使用相同密码。</div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3>账号信息</h3>
+                        </div>
+                        <div class="lx-card-body">
+                            <div class="lx-attr" style="grid-template-columns:1fr 1fr;">
+                                <div class="kv"><span class="k">登录账号</span><span class="v">@member.Email</span></div>
+                                <div class="kv"><span class="k">用户名</span><span class="v">@nick</span></div>
+                                <div class="kv"><span class="k">邮箱验证</span><span class="v">@(member.AuthCode == null ? "已通过验证" : "待验证")</span></div>
+                                <div class="kv"><span class="k">注册时长</span><span class="v">@((DateTime.Now - member.RegisterOn).Days) 天</span></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- 账号概览 -->
+                    <div class="lx-kpi mb-3">
+                        <div class="cell">
+                            <div class="k">@LXIcon.Orders(15) 订单总数</div>
+                            <div class="v">@orders.Count</div>
+                        </div>
+                        <div class="cell">
+                            <div class="k">@LXIcon.Wallet(15) 累计消费</div>
+                            <div class="v sale">@LXHelper.Money(Model.TotalSpent)</div>
+                        </div>
+                        <div class="cell">
+                            <div class="k">@LXIcon.Truck(15) 待发货</div>
+                            <div class="v">@Model.UnshippedCount</div>
+                        </div>
+                        <div class="cell">
+                            <div class="k">@LXIcon.Location(15) 收货地址</div>
+                            <div class="v">@addresses.Count</div>
+                        </div>
+                    </div>
+
+                    <div class="lx-card mb-3">
+                        <div class="lx-card-head">
+                            <h3>账号资料</h3>
+                            <a class="lx-more" href="@tabUrl("settings")">修改资料 @LXIcon.ArrowRight(14)</a>
+                        </div>
+                        <div class="lx-card-body">
+                            <div class="lx-attr" style="grid-template-columns:1fr 1fr;">
+                                <div class="kv"><span class="k">用户名</span><span class="v">@nick</span></div>
+                                <div class="kv"><span class="k">姓名</span><span class="v">@member.Name</span></div>
+                                <div class="kv"><span class="k">登录邮箱</span><span class="v">@member.Email</span></div>
+                                <div class="kv"><span class="k">注册时间</span><span class="v">@member.RegisterOn.ToString("yyyy-MM-dd HH:mm")</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3>最近订单</h3>
+                            <a class="lx-more" href="@tabUrl("orders")">全部订单 @LXIcon.ArrowRight(14)</a>
+                        </div>
+                        <div class="lx-card-body">
+                            @if (orders.Any())
+                            {
+                                <div class="lx-table-wrap">
+                                    <table class="lx-table">
+                                        <thead>
+                                            <tr>
+                                                <th>订单号</th>
+                                                <th>下单时间</th>
+                                                <th>商品件数</th>
+                                                <th>状态</th>
+                                                <th style="text-align:right;">金额</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var o in orders.Take(5))
+                                            {
+                                                <tr>
+                                                    <td class="strong">@o.OrderNo</td>
+                                                    <td class="nowrap">@o.BuyOn.ToString("yyyy-MM-dd HH:mm")</td>
+                                                    <td>@o.TotalQuantity 件</td>
+                                                    <td>
+                                                        <span class="lx-badge @(o.IsAllShipped ? "lx-badge-ok" : "lx-badge-warn")">@o.StatusText</span>
+                                                    </td>
+                                                    <td style="text-align:right;" class="strong">@LXHelper.Money(o.TotalPrice)</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-0">你还没有下过订单，去挑几件喜欢的商品吧。</p>
+                                <a class="lx-btn lx-btn-primary lx-btn-sm mt-3" href="@Url.Action("ProductList", "Home")">去逛逛</a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function ($) {
+            // 点删除按钮，把这条收货地址删掉
+            $(document).on("click", "[data-addr-delete]", function () {
+                var id = $(this).data("addr-delete");
+                if (!window.confirm("确定要删除这条收货地址吗？")) return;
+                $.post("@Url.Action("AddressDelect", "AboutMember")", { id: id })
+                    .done(function (res) {
+                        if (res && res.ok) {
+                            LX.toast(res.message || "地址已删除", "success");
+                            window.setTimeout(function () { window.location.reload(); }, 600);
+                        } else {
+                            LX.toast((res && res.message) || "删除失败", "error");
+                        }
+                    })
+                    .fail(function () { LX.toast("网络异常，请稍后重试", "error"); });
+            });
+
+            // 点编辑，把这条地址原来的内容填回表单里
+            $(document).on("click", "[data-addr-edit]", function () {
+                var $btn = $(this);
+                $("#addrId").val($btn.data("addr-edit"));
+                $("#ContactName").val($btn.data("name"));
+                $("#ContactPhoneNo").val($btn.data("phone"));
+                $("#ContactAddress").val($btn.data("address"));
+                $("#addrFormTitle").text("编辑收货地址");
+                $("html, body").animate({ scrollTop: $("#addrForm").offset().top - 90 }, 240);
+                $("#ContactName").trigger("focus");
+            });
+
+            $(document).on("click", "#addrReset", function () {
+                $("#addrId").val("0");
+                $("#addrForm")[0].reset();
+                $("#addrFormTitle").text("新增收货地址");
+            });
+
+            // 改密码的时候，一边打字一边看两次输的是不是一样
+            var $np = $("#NewPassword"), $cp = $("#ConfirmPassword");
+            function checkPwd() {
+                if (!$cp.length || !$cp.val()) return;
+                if ($np.val() !== $cp.val()) {
+                    $cp[0].setCustomValidity("两次输入的新密码不一致");
+                } else {
+                    $cp[0].setCustomValidity("");
+                }
+            }
+            $np.on("input", checkPwd);
+            $cp.on("input", checkPwd);
+        })(window.jQuery);
+    </script>
+}

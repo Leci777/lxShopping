@@ -1,0 +1,98 @@
+@model LXShopping.Models.Member
+@{
+    Layout = "~/Views/Shared/_Layout-Admin.cshtml";
+    ViewBag.Title = "编辑用户";
+    ViewBag.PageTitle = "编辑用户";
+    ViewBag.PageSub = "修改会员姓名、用户名与头像";
+}
+<div class="lx-page-head">
+    <div>
+        <h2>编辑用户</h2>
+        <p>@Model.Email · 会员编号 U-@Model.Id.ToString("D5") · 注册于 @Model.RegisterOn.ToString("yyyy-MM-dd HH:mm")</p>
+    </div>
+    <div class="lx-actions">
+        <span class="lx-badge @(Model.AuthCode == null ? "lx-badge-ok" : "lx-badge-warn")">
+            @(Model.AuthCode == null ? "已通过邮箱认证" : "待邮箱认证")
+        </span>
+        @if (Model.AuthCode != null)
+        {
+            <button class="lx-act ok" type="button" data-admin-user-auth="@Model.Id">通过认证</button>
+        }
+        <button class="lx-act warn" type="button" data-admin-user-reset="@Model.Id">重置密码</button>
+        <a class="lx-btn lx-btn-outline lx-btn-sm" href="@Url.Action("Users", "Admin")">@LXIcon.ArrowRight(15) 返回列表</a>
+    </div>
+</div>
+
+@using (Html.BeginForm("UserEdit", "Admin", new { id = Model.Id }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="lx-card mb-3">
+        <div class="lx-card-head">
+            <h3>会员资料</h3>
+        </div>
+        <div class="lx-card-body">
+            <div class="lx-form-grid">
+                <div class="lx-field">
+                    <label class="lx-label" for="Name">中文姓名<span class="req">*</span></label>
+                    <input class="lx-input" type="text" id="Name" name="Name" maxlength="5" required value="@Model.Name" />
+                    <div class="lx-help">最多 5 个字</div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Nickname">用户名<span class="req">*</span></label>
+                    <input class="lx-input" type="text" id="Nickname" name="Nickname" maxlength="10" required value="@Model.Nickname" />
+                    <div class="lx-help">最多 10 个字</div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label">邮箱账号</label>
+                    <input class="lx-input" type="text" value="@Model.Email" readonly />
+                    <div class="lx-help">邮箱不可修改</div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label">认证状态</label>
+                    <input class="lx-input" type="text" readonly
+                           value="@(Model.AuthCode == null ? "已通过邮箱认证" : "待邮箱认证 (" + Model.AuthCode + ")")" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-card mb-3">
+        <div class="lx-card-head">
+            <h3>会员头像</h3>
+            <span class="text-muted" style="font-size:12.5px;">不选择新图片时保留当前头像</span>
+        </div>
+        <div class="lx-card-body">
+            <div class="lx-upload">
+                <div class="preview" id="imagePreview">
+                    @if (Model.ImageData != null && Model.ImageData.Length > 0)
+                    {
+                        <img src="@Url.Action("GetImage", "Member", new { id = Model.Id })" alt="头像" />
+                    }
+                    else
+                    {
+                        <span>暂无头像</span>
+                    }
+                </div>
+                <div>
+                    <label class="lx-btn lx-btn-outline lx-btn-sm pick">
+                        更换头像
+                        <input type="file" name="image" accept="image/*"
+                               data-upload-preview="#imagePreview" data-upload-name="#imageName" />
+                    </label>
+                    <div class="filename" id="imageName">未选择文件</div>
+                    <div class="lx-help">支持 JPG / PNG / GIF / WEBP，建议使用 1:1 正方形图片，不超过 4MB。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-actions">
+        <button class="lx-btn lx-btn-primary" type="submit">保存修改</button>
+        <a class="lx-btn lx-btn-outline" href="@Url.Action("Users", "Admin")">取消</a>
+        <button class="lx-btn lx-btn-ink" type="button" data-admin-user-delete="@Model.Id">删除该用户</button>
+    </div>
+}

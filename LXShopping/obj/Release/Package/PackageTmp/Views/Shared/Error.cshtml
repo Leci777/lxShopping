@@ -1,0 +1,21 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "页面出了一点小问题";
+}
+<div class="lx-section">
+    <div class="lx-container">
+        <div class="lx-card" style="max-width:640px;margin:40px auto;">
+            <div class="lx-card-body text-center">
+                <img src="@Url.Content("~/Content/Images/empty-box.svg")" alt="出错了" style="width:200px;margin-bottom:12px;" />
+                <h3 class="mb-2">页面出了一点小问题</h3>
+                <p class="text-muted mb-4">
+                    很抱歉，刚才那次操作没有成功。您可以返回首页重新开始，或者稍后再试。
+                </p>
+                <div class="lx-btn-group justify-content-center">
+                    <a class="lx-btn lx-btn-primary" href="@Url.Action("Index", "Home")">返回首页</a>
+                    <a class="lx-btn lx-btn-outline" href="@Url.Action("ProductList", "Home")">继续逛商品</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

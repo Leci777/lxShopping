@@ -1,0 +1,68 @@
+@model LXShopping.Models.AdminLoginViewModel
+@{
+    Layout = null;
+    var returnUrl = ViewBag.ReturnUrl as string;
+}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#0E1526" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>管理后台登录 - LX 优选商城</title>
+    <link rel="icon" href="@Url.Content("~/favicon.ico")" />
+    @Styles.Render("~/Content/admincss")
+</head>
+<body>
+    <div class="lx-adminlogin">
+        <div class="card">
+            <div class="text-center mb-4">
+                <img src="@Url.Content("~/Content/Images/lx-mark.svg")" alt="LX" style="width:56px;height:56px;border-radius:16px;" />
+                <h2 style="font-size:22px;margin-top:14px;">LX 管理后台</h2>
+                <p class="text-muted mb-0" style="font-size:13px;">请使用管理员账号登录，进行商城运营管理</p>
+            </div>
+
+            @using (Html.BeginForm("Login", "Admin", new { returnUrl = returnUrl }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors mb-3" })
+
+                <div class="lx-field">
+                    <label class="lx-label" for="AdminName">管理员账号<span class="req">*</span></label>
+                    <div class="lx-input-icon">
+                        <span class="ico">@LXIcon.User(18)</span>
+                        <input class="lx-input" type="text" id="AdminName" name="AdminName"
+                               value="@Model.AdminName" placeholder="请输入管理员账号" autocomplete="username" autofocus />
+                    </div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Pwd">登录密码<span class="req">*</span></label>
+                    <div class="lx-input-icon">
+                        <span class="ico">@LXIcon.Shield(18)</span>
+                        <input class="lx-input" type="password" id="Pwd" name="Pwd"
+                               placeholder="请输入登录密码" autocomplete="current-password" />
+                        <button type="button" class="act" data-toggle-pwd="#Pwd" title="显示密码">@LXIcon.Eye(18)</button>
+                    </div>
+                </div>
+
+                <button class="lx-btn lx-btn-primary lx-btn-block lx-btn-lg mt-2" type="submit">登录后台</button>
+            }
+
+            <div class="lx-help mt-3 text-center">admin / 123456　·　lxadmin / lx123456</div>
+            <div class="lx-help text-center">
+                <a href="@Url.Action("Index", "Home")">← 返回商城首页</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-toasts"></div>
+    @Html.Partial("_Toast")
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script src="@Url.Content("~/Content/lx/lx.js")"></script>
+</body>
+</html>

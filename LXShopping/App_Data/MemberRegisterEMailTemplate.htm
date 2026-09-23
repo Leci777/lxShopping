@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{SiteName}} 会员注册确认信</title>
+</head>
+<body style="margin:0;padding:24px 12px;background:#F5F7FC;font-family:'Microsoft YaHei','PingFang SC','Segoe UI',Arial,sans-serif;color:#1F2544;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;border-collapse:collapse;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 6px 24px rgba(20,27,62,.08);">
+                    <!-- 顶上带 logo 的那一条 -->
+                    <tr>
+                        <td style="padding:28px 34px;background:#5B4BFF;background-image:linear-gradient(135deg,#5B4BFF 0%,#4A54F1 45%,#12C2B4 100%);">
+                            <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                                <tr>
+                                    <td style="vertical-align:middle;">
+                                        <div style="width:44px;height:44px;border-radius:13px;background:rgba(255,255,255,.18);color:#FFFFFF;font-size:22px;font-weight:700;line-height:44px;text-align:center;">LX</div>
+                                    </td>
+                                    <td style="padding-left:12px;vertical-align:middle;">
+                                        <div style="color:#FFFFFF;font-size:19px;font-weight:700;letter-spacing:.5px;line-height:1.25;">LX 优选</div>
+                                        <div style="color:rgba(255,255,255,.78);font-size:11px;letter-spacing:3px;">SHOPPING</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- 正文内容 -->
+                    <tr>
+                        <td style="padding:32px 34px 8px;">
+                            <h1 style="margin:0 0 12px;font-size:21px;line-height:1.5;color:#1F2544;">亲爱的 {{Name}}，欢迎加入 {{SiteName}}！</h1>
+                            <p style="margin:0 0 18px;font-size:14px;line-height:1.9;color:#4A5170;">
+                                感谢您在 {{RegisterOn}} 注册成为 LX 优选商城会员。为确认邮箱真实有效，请点击下方按钮完成账号激活。
+                            </p>
+
+                            <div style="text-align:center;padding:10px 0 22px;">
+                                <a href="{{AUTH_URL}}" style="display:inline-block;padding:14px 42px;border-radius:999px;background:#5B4BFF;background-image:linear-gradient(135deg,#5B4BFF 0%,#12C2B4 100%);color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;">立即激活我的账号</a>
+                            </div>
+
+                            <p style="margin:0 0 8px;font-size:13px;line-height:1.9;color:#828BA5;">
+                                如果按钮无法点击，请复制下面的链接，粘贴到浏览器地址栏中打开：
+                            </p>
+                            <p style="margin:0 0 24px;padding:12px 14px;background:#F5F7FC;border:1px solid #E9ECF6;border-radius:10px;font-size:12.5px;line-height:1.7;color:#4A5170;word-break:break-all;">
+                                {{AUTH_URL}}
+                            </p>
+
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:#FBFCFE;border:1px solid #E9ECF6;border-radius:12px;">
+                                <tr>
+                                    <td style="padding:16px 18px;font-size:13px;line-height:1.9;color:#4A5170;">
+                                        <b style="color:#1F2544;">新会员小提示</b><br />
+                                        · 满 99 元免运费，48 小时内发出<br />
+                                        · 7 天无理由退换，售后无忧<br />
+                                        · 客服热线 023-6666 6666（09:00 - 21:00）
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin:22px 0 0;font-size:12.5px;line-height:1.9;color:#828BA5;">
+                                如果您并非本人操作，请忽略本邮件，该链接将在使用一次后自动失效。
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- 页脚 -->
+                    <tr>
+                        <td style="padding:22px 34px 28px;">
+                            <div style="border-top:1px solid #E9ECF6;padding-top:16px;font-size:12px;line-height:1.8;color:#828BA5;">
+                                © {{SiteName}} · 精选好物，优选生活<br />
+                                本邮件由系统自动发送，请勿直接回复。
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

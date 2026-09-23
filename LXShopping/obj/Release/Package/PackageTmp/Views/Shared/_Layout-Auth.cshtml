@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#5B4BFF" />
+    <title>@(ViewBag.Title != null ? ViewBag.Title + " - LX 优选商城" : "LX 优选商城")</title>
+    <link rel="icon" href="@Url.Content("~/favicon.ico")" />
+    <link rel="apple-touch-icon" href="@Url.Content("~/Content/Images/lx-mark-256.png")" />
+    @Styles.Render("~/Content/css")
+    @RenderSection("styles", required: false)
+</head>
+<body>
+    @RenderBody()
+
+    <div class="lx-toasts"></div>
+    @Html.Partial("_Toast")
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/ajax")
+    <script src="@Url.Content("~/Content/lx/lx.js")"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

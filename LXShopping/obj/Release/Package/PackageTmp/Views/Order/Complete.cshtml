@@ -1,0 +1,201 @@
+@model LXShopping.Models.CheckoutViewModel
+@{
+    ViewBag.Title = "填写订单";
+    var items = Model.Items == null ? new List<LXShopping.Models.Cart>() : Model.Items.Where(x => x.Product != null).ToList();
+    var addresses = Model.Addresses ?? new List<LXShopping.Models.MemberAddress>();
+    var goodsTotal = items.Sum(i => i.SubTotal);
+    var shipFee = goodsTotal >= 99m ? 0m : (goodsTotal == 0m ? 0m : 10m);
+    var payable = goodsTotal + shipFee;
+    var payMethods = new[] { "在线支付", "货到付款", "余额支付" };
+}
+<div class="lx-crumb">
+    <div class="lx-container">
+        <a href="@Url.Action("Index", "Home")">首页</a>
+        <span class="sep">/</span>
+        <a href="@Url.Action("Index", "Cart")">购物车</a>
+        <span class="sep">/</span>
+        <span class="now">填写订单</span>
+    </div>
+</div>
+
+<div class="lx-section">
+    <div class="lx-container">
+        <div class="lx-steps">
+            <span class="step done"><span class="n">1</span> 我的购物车</span>
+            <span class="line"></span>
+            <span class="step on"><span class="n">2</span> 填写收货信息</span>
+            <span class="line"></span>
+            <span class="step"><span class="n">3</span> 下单完成</span>
+        </div>
+
+        @using (Html.BeginForm("Complete", "Order", FormMethod.Post, new { id = "checkoutForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="lx-cart-layout">
+                <div>
+                    <!-- 收货地址，可以选以前存过的，也可以现填 -->
+                    <div class="lx-card mb-3">
+                        <div class="lx-card-head">
+                            <h3>收货地址</h3>
+                            <button class="lx-act" type="button" data-use-new-address>@LXIcon.Plus(15) 使用新地址</button>
+                        </div>
+                        <div class="lx-card-body">
+                            @if (addresses.Any())
+                            {
+                                foreach (var a in addresses)
+                                {
+                                    <label class="lx-addr" data-address-pick>
+                                        <input type="radio" name="addressId" value="@a.Id" />
+                                        <span class="nm">
+                                            @a.ContactName
+                                            <span class="lx-badge lx-badge-grey">@a.ContactPhoneNo</span>
+                                        </span>
+                                        <div class="ad">@a.ContactAddress</div>
+                                        <span class="tick">@LXIcon.Check(13)</span>
+                                    </label>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-2">您还没有保存任何收货地址，请在下方填写。</p>
+                            }
+
+                            <div id="newAddressBlock" style="@(addresses.Any() ? "display:none;" : "")">
+                                @if (addresses.Any())
+                                {
+                                    <input type="radio" name="addressId" value="0" data-address-radio-new
+                                           style="position:absolute;opacity:0;" />
+                                }
+                                else
+                                {
+                                    <input type="radio" name="addressId" value="0" data-address-radio-new
+                                           style="position:absolute;opacity:0;" checked="checked" />
+                                }
+                                <div class="lx-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+                                    <div class="lx-field">
+                                        <label class="lx-label" for="ContactName">收件人姓名<span class="req">*</span></label>
+                                        <input class="lx-input" type="text" id="ContactName" name="ContactName"
+                                               placeholder="请输入收件人姓名" maxlength="40" />
+                                    </div>
+                                    <div class="lx-field">
+                                        <label class="lx-label" for="ContactPhoneNo">联系电话<span class="req">*</span></label>
+                                        <input class="lx-input" type="text" id="ContactPhoneNo" name="ContactPhoneNo"
+                                               placeholder="请输入手机号或固定电话" maxlength="25" />
+                                    </div>
+                                    <div class="lx-field" style="grid-column:1 / -1;">
+                                        <label class="lx-label" for="ContactAddress">详细地址<span class="req">*</span></label>
+                                        <textarea class="lx-textarea" id="ContactAddress" name="ContactAddress"
+                                                  placeholder="省 / 市 / 区 + 街道门牌号，例如：重庆市巴南区南泉街道重庆工程学院 23 栋 502"
+                                                  maxlength="200" style="min-height:80px;"></textarea>
+                                    </div>
+                                </div>
+                                <p class="lx-help">提交订单后会同时为您保存这个地址，下次可直接选用。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 这次要买的商品清单 -->
+                    <div class="lx-card mb-3">
+                        <div class="lx-card-head">
+                            <h3>商品清单 · 共 @items.Sum(i => i.Amount) 件</h3>
+                            <a class="lx-more" href="@Url.Action("Index", "Cart")">返回购物车修改</a>
+                        </div>
+                        <div class="lx-card-body">
+                            @foreach (var line in items)
+                            {
+                                <div class="lx-line" style="box-shadow:none;">
+                                    <a class="thumb" href="@Url.Action("ProductDetail", "Home", new { id = line.Product.Id })">
+                                        <img src="@Url.Action("GetImage", "Home", new { id = line.Product.Id })" alt="@line.Product.Name" />
+                                    </a>
+                                    <div>
+                                        <a class="name" href="@Url.Action("ProductDetail", "Home", new { id = line.Product.Id })">@line.Product.Name</a>
+                                        <div class="meta">
+                                            @if (line.Product.ProductCategory != null)
+                                            {
+                                                <span class="lx-badge lx-badge-primary">@line.Product.ProductCategory.Name</span>
+                                            }
+                                            <span>@line.Product.Made</span>
+                                        </div>
+                                        <div class="meta">@LXHelper.Money(line.Product.Price) × @line.Amount</div>
+                                    </div>
+                                    <div class="actions">
+                                        <span class="lx-price lx-price-sm">@LXHelper.Money(line.SubTotal)</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- 支付方式，还有给商家留的备注 -->
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3>支付方式与备注</h3>
+                        </div>
+                        <div class="lx-card-body">
+                            <div class="lx-field">
+                                <label class="lx-label" for="payMethod">支付方式</label>
+                                <select class="lx-select" id="payMethod" name="payMethod">
+                                    @foreach (var m in payMethods)
+                                    {
+                                        <option value="@m">@m</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="lx-field mb-0">
+                                <label class="lx-label" for="memo">订单备注</label>
+                                <textarea class="lx-textarea" id="memo" name="memo" maxlength="200"
+                                          placeholder="选填，例如：请在工作日送货 / 放在门口快递柜"></textarea>
+                                <div class="lx-help">备注信息将展示给配送人员，最多 200 个字。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右边这个框是结算摘要 -->
+                <aside class="lx-sticky">
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3>应付金额</h3>
+                        </div>
+                        <div class="lx-card-body">
+                            <div class="lx-summary-row">
+                                <span>商品合计</span>
+                                <span class="v">@LXHelper.Money(goodsTotal)</span>
+                            </div>
+                            <div class="lx-summary-row">
+                                <span>运费</span>
+                                <span class="v">@(shipFee == 0m ? "免运费" : LXHelper.Money(shipFee))</span>
+                            </div>
+                            <div class="lx-summary-row total">
+                                <span>应付</span>
+                                <span class="v">@LXHelper.Money(payable)</span>
+                            </div>
+
+                            <button class="lx-btn lx-btn-sale lx-btn-block lx-btn-lg mt-3" type="submit"
+                                    data-confirm="确认提交订单吗？提交后将为您锁定商品库存。">
+                                提交订单
+                            </button>
+
+                            <div class="lx-help text-center mt-2">
+                                提交即表示同意《LX 优选商城交易条款》
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // 默认选中第一条已保存的地址，让视觉状态与表单值保持一致
+        (function () {
+            var $first = $("[data-address-pick]").first();
+            if ($first.length) {
+                $first.addClass("is-active").find("input[type=radio]").prop("checked", true);
+            }
+        })();
+    </script>
+}

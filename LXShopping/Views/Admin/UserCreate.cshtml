@@ -1,0 +1,90 @@
+@model LXShopping.Models.Member
+@{
+    Layout = "~/Views/Shared/_Layout-Admin.cshtml";
+    ViewBag.Title = "新增用户";
+    ViewBag.PageTitle = "新增用户";
+    ViewBag.PageSub = "由管理员直接为会员开通账号";
+}
+<div class="lx-page-head">
+    <div>
+        <h2>新增用户</h2>
+        <p>创建后会立即生效，可直接用该邮箱登录前台商城</p>
+    </div>
+    <div class="lx-actions">
+        <a class="lx-btn lx-btn-outline lx-btn-sm" href="@Url.Action("Users", "Admin")">@LXIcon.ArrowRight(15) 返回列表</a>
+    </div>
+</div>
+
+@using (Html.BeginForm("UserCreate", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="lx-card mb-3">
+        <div class="lx-card-head">
+            <h3>账号信息</h3>
+        </div>
+        <div class="lx-card-body">
+            <div class="lx-form-grid">
+                <div class="lx-field">
+                    <label class="lx-label" for="Email">邮箱账号<span class="req">*</span></label>
+                    <input class="lx-input" type="email" id="Email" name="Email" maxlength="250" required
+                           placeholder="例如：member@example.com" />
+                    <div class="lx-help">邮箱将作为会员的登录账号，注册后不可修改</div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Password">初始密码<span class="req">*</span></label>
+                    <input class="lx-input" type="text" id="Password" name="Password" minlength="6" maxlength="20" required
+                           placeholder="至少 6 位" />
+                    <div class="lx-help">请把初始密码告知会员，并提醒尽快修改</div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Name">中文姓名<span class="req">*</span></label>
+                    <input class="lx-input" type="text" id="Name" name="Name" maxlength="5" required placeholder="例如：李鑫" />
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Nickname">用户名<span class="req">*</span></label>
+                    <input class="lx-input" type="text" id="Nickname" name="Nickname" maxlength="10" required placeholder="例如：LX用户" />
+                </div>
+
+                <div class="lx-field span2">
+                    <label class="lx-switch">
+                        <input type="checkbox" name="Verified" value="true" checked />
+                        <span class="track"></span>
+                        直接标记为「已通过邮箱认证」
+                    </label>
+                    <div class="lx-help">不勾选时，会员需要先完成邮箱验证才能登录。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-card mb-3">
+        <div class="lx-card-head">
+            <h3>会员头像</h3>
+        </div>
+        <div class="lx-card-body">
+            <div class="lx-upload">
+                <div class="preview" id="imagePreview">
+                    <span>暂无头像</span>
+                </div>
+                <div>
+                    <label class="lx-btn lx-btn-outline lx-btn-sm pick">
+                        选择图片
+                        <input type="file" name="image" accept="image/*"
+                               data-upload-preview="#imagePreview" data-upload-name="#imageName" />
+                    </label>
+                    <div class="filename" id="imageName">未选择文件</div>
+                    <div class="lx-help">不上传时系统会生成一个文字头像，不超过 4MB。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-actions">
+        <button class="lx-btn lx-btn-primary" type="submit">创建用户</button>
+        <a class="lx-btn lx-btn-outline" href="@Url.Action("Users", "Admin")">取消</a>
+    </div>
+}

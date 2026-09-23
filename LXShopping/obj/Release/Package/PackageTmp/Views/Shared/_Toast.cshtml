@@ -1,0 +1,12 @@
+@{
+    var toastMessage = TempData["LX_Toast"] as string;
+    var toastType = (TempData["LX_ToastType"] as string) ?? "info";
+}
+@*
+    用来接后端发过来的提示消息。
+    页面加载完之后 lx.js 会把里面的内容读出来弹个浮层，然后把这个节点删掉。
+*@
+@if (!string.IsNullOrEmpty(toastMessage))
+{
+    <div id="lxFlash" data-message="@toastMessage" data-type="@toastType" hidden></div>
+}

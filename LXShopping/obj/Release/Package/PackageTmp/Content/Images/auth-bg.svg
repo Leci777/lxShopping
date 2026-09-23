@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" preserveAspectRatio="xMidYMid slice" role="img" aria-label="LX 优选商城">
+  <defs>
+    <linearGradient id="ab" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4A2FD8"/>
+      <stop offset="0.45" stop-color="#4A54F1"/>
+      <stop offset="1" stop-color="#12C2B4"/>
+    </linearGradient>
+    <radialGradient id="ag" cx="0.75" cy="0.2" r="0.7">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="900" height="1200" fill="url(#ab)"/>
+  <rect width="900" height="1200" fill="url(#ag)"/>
+  <circle cx="150" cy="150" r="240" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="800" cy="1050" r="300" fill="#000000" fill-opacity="0.10"/>
+  <circle cx="760" cy="220" r="130" fill="#ffffff" fill-opacity="0.10"/>
+  <g opacity="0.20" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <path d="M-40 900 Q220 760 460 860 T940 800"/>
+    <path d="M-40 960 Q240 830 480 920 T940 870"/>
+    <path d="M-40 1020 Q260 900 500 980 T940 940"/>
+  </g>
+  <g opacity="0.9" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" transform="translate(360,470) scale(2.8)">
+    <path d="M17 16V43H30"/>
+    <path d="M33 17L47 44"/>
+    <path d="M47 17L33 44"/>
+  </g>
+</svg>

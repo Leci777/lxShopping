@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="LX 年度旗舰新品首发">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5B4BFF"/>
+      <stop offset="0.55" stop-color="#3A57E8"/>
+      <stop offset="1" stop-color="#12C2B4"/>
+    </linearGradient>
+    <radialGradient id="gl1" cx="0.78" cy="0.18" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="400" fill="url(#bg1)"/>
+  <rect width="1200" height="400" fill="url(#gl1)"/>
+  <circle cx="1010" cy="90" r="220" fill="#ffffff" fill-opacity="0.10"/>
+  <circle cx="1090" cy="330" r="150" fill="#000000" fill-opacity="0.10"/>
+  <circle cx="150" cy="360" r="180" fill="#ffffff" fill-opacity="0.06"/>
+  <g opacity="0.22" stroke="#ffffff" stroke-width="2" fill="none">
+    <path d="M0 300 Q300 200 600 280 T1200 220"/>
+    <path d="M0 330 Q320 240 620 310 T1200 260"/>
+  </g>
+  <text x="96" y="132" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" font-size="22" fill="#ffffff" fill-opacity="0.85" letter-spacing="6">NEW ARRIVAL · 新品首发</text>
+  <text x="96" y="206" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" font-size="54" font-weight="700" fill="#ffffff">LX 年度旗舰 · 主动降噪耳机</text>
+  <text x="96" y="252" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" font-size="22" fill="#ffffff" fill-opacity="0.82">40dB 深度降噪 · 12 小时续航 · 双设备同时连接</text>
+  <g transform="translate(96,296)">
+    <rect width="176" height="50" rx="25" fill="#ffffff"/>
+    <text x="88" y="33" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="19" font-weight="700" fill="#3A2EE0">立即选购</text>
+    <rect x="196" y="0" width="150" height="50" rx="25" fill="none" stroke="#ffffff" stroke-opacity="0.65" stroke-width="2"/>
+    <text x="271" y="33" text-anchor="middle" font-family="Microsoft YaHei, Segoe UI, sans-serif" font-size="19" fill="#ffffff">查看详情</text>
+  </g>
+</svg>

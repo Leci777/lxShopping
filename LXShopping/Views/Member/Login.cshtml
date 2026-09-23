@@ -1,0 +1,98 @@
+@model LXShopping.Models.MemberLoginViewModel
+@{
+    Layout = "~/Views/Shared/_Layout-Auth.cshtml";
+    ViewBag.Title = "会员登录";
+    var returnUrl = (ViewBag.ReturnUrl as string) ?? Model.ReturnUrl;
+}
+<div class="lx-auth">
+    <div class="lx-auth-left">
+        <div class="top">
+            <img src="@Url.Content("~/Content/Images/lx-mark-white.svg")" alt="LX" />
+            <div>
+                <b>LX 优选</b>
+                <span>SHOPPING</span>
+            </div>
+        </div>
+
+        <div class="mid">
+            <h2>欢迎回来<br />继续发现好物</h2>
+            <p>登录后即可同步购物车、查看订单进度，并领取会员专属优惠。LX 优选商城，为每一次购物负责。</p>
+            <div class="feats">
+                <div class="f"><i>@LXIcon.Check(14)</i> 正品保障，官方渠道发货</div>
+                <div class="f"><i>@LXIcon.Check(14)</i> 满 99 元免运费，48 小时内发出</div>
+                <div class="f"><i>@LXIcon.Check(14)</i> 7 天无理由退换，售后无忧</div>
+            </div>
+        </div>
+
+        <div class="bottom">© @DateTime.Now.Year LX 优选商城 · 精选好物，优选生活</div>
+    </div>
+
+    <div class="lx-auth-right">
+        <a class="lx-auth-back" href="@Url.Action("Index", "Home")">@LXIcon.ArrowRight(14) 返回首页</a>
+
+        <div class="lx-auth-card">
+            <h3>会员登录</h3>
+            <p class="lead">使用注册时填写的 Email 账号登录</p>
+
+            @using (Html.BeginForm("Login", "Member", new { returnUrl = returnUrl }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors mb-3" })
+
+                <div class="lx-field">
+                    <label class="lx-label" for="email">会员账号<span class="req">*</span></label>
+                    <div class="lx-input-icon">
+                        <span class="ico">@LXIcon.User(18)</span>
+                        @Html.EditorFor(m => m.email, new
+                        {
+                            htmlAttributes = new
+                            {
+                                @class = "lx-input",
+                                placeholder = "请输入注册邮箱",
+                                autocomplete = "username",
+                                autofocus = "autofocus"
+                            }
+                        })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.email, "", new { @class = "lx-msg" })
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="password">登录密码<span class="req">*</span></label>
+                    <div class="lx-input-icon">
+                        <span class="ico">@LXIcon.Shield(18)</span>
+                        @Html.EditorFor(m => m.password, new
+                        {
+                            htmlAttributes = new
+                            {
+                                @class = "lx-input",
+                                placeholder = "请输入登录密码",
+                                autocomplete = "current-password"
+                            }
+                        })
+                        <button type="button" class="act" data-toggle-pwd="#password" title="显示密码">@LXIcon.Eye(18)</button>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.password, "", new { @class = "lx-msg" })
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <label class="lx-switch">
+                        <input type="checkbox" name="rememberMe" value="true" />
+                        <span class="track"></span>
+                        记住我
+                    </label>
+                    <a href="@Url.Action("Register", "Member")" style="font-size:13px;">还没账号？免费注册</a>
+                </div>
+
+                <button class="lx-btn lx-btn-primary lx-btn-block lx-btn-lg" type="submit">登录</button>
+            }
+
+            <div class="switch">
+                <b>demo@lx.com</b> / <b>123456</b>
+            </div>
+            <div class="switch" style="margin-top:8px;">
+                管理员入口：<a href="@Url.Action("Login", "Admin")">前往后台登录</a>
+            </div>
+        </div>
+    </div>
+</div>

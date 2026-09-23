@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="280" viewBox="0 0 360 280" role="img" aria-label="暂无数据">
+  <defs>
+    <linearGradient id="eb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8E9BD6"/>
+      <stop offset="1" stop-color="#B7C4E8"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="180" cy="238" rx="120" ry="18" fill="#E7EBF7"/>
+  <g fill="none" stroke="url(#eb)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M180 66l96 46v96l-96 46-96-46v-96z"/>
+    <path d="M180 160l96-46M180 160L84 114M180 160v94"/>
+    <path d="M84 114l48-24 96 46-48 24"/>
+  </g>
+  <g fill="none" stroke="#D6DDF0" stroke-width="5" stroke-linecap="round">
+    <path d="M318 88h16M310 112h24M42 130H26"/>
+  </g>
+</svg>

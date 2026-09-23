@@ -1,0 +1,263 @@
+@model LXShopping.Models.DashboardViewModel
+@{
+    Layout = "~/Views/Shared/_Layout-Admin.cshtml";
+    ViewBag.Title = "数据仪表盘";
+    ViewBag.PageTitle = "数据仪表盘";
+    ViewBag.PageSub = "商城整体运营数据总览";
+
+    var dayStats = Model.DayStats ?? new List<LXShopping.Models.DayStat>();
+    var catStats = Model.CategoryStats ?? new List<LXShopping.Models.CategoryStat>();
+    var lowStock = Model.LowStockProducts ?? new List<LXShopping.Models.Product>();
+    var recentOrders = Model.RecentOrders ?? new List<LXShopping.Models.OrderHeader>();
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+}
+<div class="lx-page-head">
+    <div>
+        <h2>运营总览</h2>
+        <p>数据统计截至 @DateTime.Now.ToString("yyyy-MM-dd HH:mm")</p>
+    </div>
+    <div class="lx-actions">
+        <a class="lx-btn lx-btn-outline lx-btn-sm" href="@Url.Action("ProductCreate", "Admin")">@LXIcon.Plus(15) 上架商品</a>
+        <a class="lx-btn lx-btn-primary lx-btn-sm" href="@Url.Action("Ordermanagement", "Admin")">@LXIcon.Truck(15) 处理订单</a>
+    </div>
+</div>
+
+<!-- 最上面那四个核心指标卡 -->
+<div class="lx-grid lx-grid-4 mb-3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+    <div class="lx-stat v1">
+        <div class="glow"></div>
+        <div class="row1">
+            <span class="lab">@LXIcon.Wallet(15) 累计成交额</span>
+            <span class="ico">@LXIcon.Wallet(20)</span>
+        </div>
+        <div class="num">@LXHelper.Money(Model.Turnover)</div>
+        <div class="foot">客单价 @LXHelper.Money(Model.AvgOrderPrice)</div>
+    </div>
+
+    <div class="lx-stat v2">
+        <div class="glow"></div>
+        <div class="row1">
+            <span class="lab">@LXIcon.Orders(15) 订单总数</span>
+            <span class="ico">@LXIcon.Orders(20)</span>
+        </div>
+        <div class="num">@Model.OrderCount <small>单</small></div>
+        <div class="foot">今日新增 @Model.TodayOrderCount 单</div>
+    </div>
+
+    <div class="lx-stat v3">
+        <div class="glow"></div>
+        <div class="row1">
+            <span class="lab">@LXIcon.Box(15) 在售商品</span>
+            <span class="ico">@LXIcon.Box(20)</span>
+        </div>
+        <div class="num">@Model.OnShelfCount <small>/ @Model.ProductCount</small></div>
+        <div class="foot">库存货值 @LXHelper.Money(Model.StockValue)</div>
+    </div>
+
+    <div class="lx-stat v4">
+        <div class="glow"></div>
+        <div class="row1">
+            <span class="lab">@LXIcon.Users(15) 注册会员</span>
+            <span class="ico">@LXIcon.Users(20)</span>
+        </div>
+        <div class="num">@Model.MemberCount <small>人</small></div>
+        <div class="foot">近 7 日新增 @Model.NewMemberCount 人</div>
+    </div>
+</div>
+
+<div class="lx-mini-stats mb-3">
+    <div class="m">
+        <div class="k">订单明细数</div>
+        <div class="v">@Model.OrderItemCount</div>
+    </div>
+    <div class="m">
+        <div class="k">待发货明细</div>
+        <div class="v" style="color:var(--lx-warn);">@Model.UnshippedCount</div>
+    </div>
+    <div class="m">
+        <div class="k">商品品类</div>
+        <div class="v">@catStats.Count</div>
+    </div>
+    <div class="m">
+        <div class="k">库存预警商品</div>
+        <div class="v" style="color:var(--lx-sale);">@lowStock.Count</div>
+    </div>
+</div>
+
+<!-- 左边是最近 7 天订单趋势，右边是各分类商品占比 -->
+<div class="lx-grid lx-grid-2 mb-3" style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;">
+    <div class="lx-card">
+        <div class="lx-card-head">
+            <h3>近 7 日订单与成交额</h3>
+            <span class="lx-badge lx-badge-primary">实时</span>
+        </div>
+        <div class="lx-card-body">
+            <div id="chartDays" class="lx-chart"></div>
+        </div>
+    </div>
+
+    <div class="lx-card">
+        <div class="lx-card-head">
+            <h3>商品品类分布</h3>
+        </div>
+        <div class="lx-card-body">
+            <div id="chartCategory" class="lx-chart"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 下面两个表：最近下单的订单，还有快没货的商品 -->
+<div class="lx-grid lx-grid-2" style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;">
+    <div class="lx-card">
+        <div class="lx-card-head">
+            <h3>最近订单</h3>
+            <a class="lx-more" href="@Url.Action("Ordermanagement", "Admin")">全部订单 @LXIcon.ArrowRight(14)</a>
+        </div>
+        <div class="lx-card-body">
+            @if (recentOrders.Any())
+            {
+                <div class="lx-table-wrap">
+                    <table class="lx-table">
+                        <thead>
+                            <tr>
+                                <th>订单号</th>
+                                <th>时间</th>
+                                <th>状态</th>
+                                <th style="text-align:right;">金额</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in recentOrders)
+                            {
+                                <tr>
+                                    <td class="strong">
+                                        <a href="@Url.Action("Orderdetails", "Admin", new { id = o.Id })">@o.OrderNo</a>
+                                    </td>
+                                    <td class="nowrap">@o.BuyOn.ToString("MM-dd HH:mm")</td>
+                                    <td>
+                                        <span class="lx-badge @(o.IsAllShipped ? "lx-badge-ok" : "lx-badge-warn")">@o.StatusText</span>
+                                    </td>
+                                    <td style="text-align:right;" class="strong">@LXHelper.Money(o.TotalPrice)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">暂时还没有订单数据。</p>
+            }
+        </div>
+    </div>
+
+    <div class="lx-card">
+        <div class="lx-card-head">
+            <h3>库存预警（≤ 20 件）</h3>
+            <a class="lx-more" href="@Url.Action("Products", "Admin")">商品管理 @LXIcon.ArrowRight(14)</a>
+        </div>
+        <div class="lx-card-body">
+            @if (lowStock.Any())
+            {
+                <div class="lx-table-wrap">
+                    <table class="lx-table">
+                        <thead>
+                            <tr>
+                                <th>商品</th>
+                                <th style="text-align:right;">库存</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in lowStock)
+                            {
+                                <tr>
+                                    <td>
+                                        <a class="strong" href="@Url.Action("ProductEdit", "Admin", new { id = p.Id })">@p.Name</a>
+                                        <div class="text-muted" style="font-size:12px;">@p.Made</div>
+                                    </td>
+                                    <td style="text-align:right;">
+                                        <span class="lx-badge @(p.Amount <= 5 ? "lx-badge-sale" : "lx-badge-warn")">@p.Amount 件</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">所有在售商品库存充足。</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="@Url.Content("~/Content/echarts.min.js")"></script>
+    <script>
+        (function () {
+            if (!window.echarts) return;
+
+            var days = [@Html.Raw(string.Join(",", dayStats.Select(d => "'" + d.Label + "'")))];
+            var orderCounts = [@string.Join(",", dayStats.Select(d => d.Orders))];
+            var amounts = [@string.Join(",", dayStats.Select(d => d.Amount.ToString("0.00", inv)))];
+            var catNames = [@Html.Raw(string.Join(",", catStats.Select(c => "'" + c.Name + "'")))];
+            var catValues = [@Html.Raw(string.Join(",", catStats.Select(c => "{ value: " + c.Count + ", name: '" + c.Name + "' }")))];
+            var catStock = [@string.Join(",", catStats.Select(c => c.Stock))];
+
+            var axisStyle = { axisLine: { lineStyle: { color: '#DFE4F2' } }, axisLabel: { color: '#828BA5' } };
+
+            var chartDays = echarts.init(document.getElementById('chartDays'));
+            chartDays.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['订单数', '成交额'], right: 0, top: 0, textStyle: { color: '#4A5170' } },
+                grid: { left: 8, right: 8, top: 44, bottom: 4, containLabel: true },
+                xAxis: { type: 'category', data: days, boundaryGap: true, axisTick: { show: false }, axisLine: axisStyle.axisLine, axisLabel: axisStyle.axisLabel },
+                yAxis: [
+                    { type: 'value', name: '订单数', splitLine: { lineStyle: { color: '#EEF1F8' } }, axisLabel: axisStyle.axisLabel },
+                    { type: 'value', name: '成交额', splitLine: { show: false }, axisLabel: { color: '#828BA5', formatter: '{value}' } }
+                ],
+                series: [
+                    {
+                        name: '订单数', type: 'bar', barWidth: 22, data: orderCounts,
+                        itemStyle: { borderRadius: [6, 6, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#7B6DFF' }, { offset: 1, color: '#5B4BFF' }]) }
+                    },
+                    {
+                        name: '成交额', type: 'line', yAxisIndex: 1, smooth: true, symbolSize: 7, data: amounts,
+                        lineStyle: { width: 3, color: '#12C2B4' }, itemStyle: { color: '#12C2B4' },
+                        areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(18,194,180,.28)' }, { offset: 1, color: 'rgba(18,194,180,0)' }]) }
+                    }
+                ]
+            });
+
+            var catData = catValues.map(function (item, i) {
+                return { value: item.value, name: item.name, stock: catStock[i] };
+            });
+
+            var chartCategory = echarts.init(document.getElementById('chartCategory'));
+            chartCategory.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function (p) { return p.name + '<br/>商品数：' + p.value + ' 个（' + p.percent + '%）'; }
+                },
+                legend: { bottom: 0, type: 'scroll', textStyle: { color: '#4A5170' } },
+                color: ['#5B4BFF', '#12C2B4', '#FF3B5C', '#F59E0B', '#2E7CF6', '#6A5ACD', '#0EA5A0', '#F76B8A'],
+                series: [{
+                    type: 'pie',
+                    radius: ['46%', '70%'],
+                    center: ['50%', '44%'],
+                    avoidLabelOverlap: true,
+                    itemStyle: { borderColor: '#fff', borderWidth: 3 },
+                    label: { show: false },
+                    labelLine: { show: false },
+                    data: catData
+                }]
+            });
+
+            window.addEventListener('resize', function () {
+                chartDays.resize();
+                chartCategory.resize();
+            });
+        })();
+    </script>
+}

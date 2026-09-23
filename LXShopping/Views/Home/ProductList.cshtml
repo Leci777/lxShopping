@@ -1,0 +1,105 @@
+@model LXShopping.Models.ProductListViewModel
+@{
+    ViewBag.Title = Model.CategoryName ?? "全部商品";
+    var categories = Model.Categories ?? new List<LXShopping.Models.ProductCategory>();
+    var sort = Model.Sort;
+
+    Func<string, string> sortUrl = key => Url.Action("ProductList", "Home", new
+    {
+        id = Model.CategoryId,
+        search = Model.Search,
+        sort = key
+    });
+}
+
+<div class="lx-crumb">
+    <div class="lx-container">
+        <a href="@Url.Action("Index", "Home")">首页</a>
+        <span class="sep">/</span>
+        @if (Model.CategoryId.HasValue)
+        {
+            <a href="@Url.Action("ProductList", "Home")">全部商品</a>
+            <span class="sep">/</span>
+            <span class="now">@Model.CategoryName</span>
+        }
+        else
+        {
+            <span class="now">全部商品</span>
+        }
+    </div>
+</div>
+
+<div class="lx-section">
+    <div class="lx-container">
+        <div class="lx-section-head">
+            <div>
+                <h1 class="lx-section-title">
+                    <span class="bar"></span>@(Model.CategoryName ?? "全部商品")
+                </h1>
+                <div class="lx-section-sub">
+                    @if (!string.IsNullOrWhiteSpace(Model.Search))
+                    {
+                        <span>关键词「@Model.Search」· </span>
+                    }
+                    共 @Model.Products.TotalItemCount 件商品
+                </div>
+            </div>
+
+            <form class="lx-search" action="@Url.Action("ProductList", "Home")" method="get" style="max-width:340px;">
+                @if (Model.CategoryId.HasValue)
+                {
+                    <input type="hidden" name="id" value="@Model.CategoryId.Value" />
+                }
+                @if (!string.IsNullOrEmpty(sort))
+                {
+                    <input type="hidden" name="sort" value="@sort" />
+                }
+                <span class="ico">@LXIcon.Search(18)</span>
+                <input type="search" name="search" value="@Model.Search" placeholder="在当前分类中搜索" aria-label="搜索商品" />
+                <button class="go" type="submit">搜索</button>
+            </form>
+        </div>
+
+        <!-- 按分类筛选 -->
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3" style="gap:8px;">
+            <a class="lx-btn lx-btn-sm @(Model.CategoryId.HasValue ? "lx-btn-outline" : "lx-btn-ghost")"
+               href="@Url.Action("ProductList", "Home", new { search = Model.Search, sort = Model.Sort })">全部</a>
+            @foreach (var c in categories)
+            {
+                <a class="lx-btn lx-btn-sm @(Model.CategoryId == c.Id ? "lx-btn-ghost" : "lx-btn-outline")"
+                   href="@Url.Action("ProductList", "Home", new { id = c.Id, search = Model.Search, sort = Model.Sort })">@c.Name</a>
+            }
+        </div>
+
+        <!-- 排序方式，点哪个就按哪个排 -->
+        <div class="lx-tabs mb-3">
+            <a class="@(string.IsNullOrEmpty(sort) ? "active" : "")"
+               href="@Url.Action("ProductList", "Home", new { id = Model.CategoryId, search = Model.Search })">综合推荐</a>
+            <a class="@(sort == "sales" ? "active" : "")" href="@sortUrl("sales")">销量优先</a>
+            <a class="@(sort == "price-asc" ? "active" : "")" href="@sortUrl("price-asc")">价格从低到高</a>
+            <a class="@(sort == "price-desc" ? "active" : "")" href="@sortUrl("price-desc")">价格从高到低</a>
+            <a class="@(sort == "new" ? "active" : "")" href="@sortUrl("new")">最新上架</a>
+        </div>
+
+        @if (Model.Products.Any())
+        {
+            <div class="lx-grid lx-grid-4">
+                @foreach (var item in Model.Products)
+                {
+                    @Html.Partial("_ProductCard", item)
+                }
+            </div>
+
+            @Html.LxPager(Model.Products, new { id = Model.CategoryId, search = Model.Search, sort = Model.Sort })
+        }
+        else
+        {
+            <div class="lx-empty">
+                <img src="@Url.Content("~/Content/Images/empty-box.svg")" alt="暂无商品" />
+                <h4>这个分类下还没有商品</h4>
+                <p>换一个分类看看，或者浏览全部在售商品。</p>
+                <a class="lx-btn lx-btn-primary" href="@Url.Action("ProductList", "Home")">浏览全部商品</a>
+            </div>
+        }
+    </div>
+</div>

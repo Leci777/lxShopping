@@ -1,0 +1,153 @@
+@model LXShopping.Models.CartViewModel
+@{
+    ViewBag.Title = "购物车";
+    var items = Model.Items ?? new List<LXShopping.Models.Cart>();
+    var freeShipGap = 99m - Model.SubTotal;
+}
+<div class="lx-crumb">
+    <div class="lx-container">
+        <a href="@Url.Action("Index", "Home")">首页</a>
+        <span class="sep">/</span>
+        <span class="now">购物车</span>
+    </div>
+</div>
+
+<div class="lx-section" data-cart-page>
+    <div class="lx-container">
+        <div class="lx-steps">
+            <span class="step on"><span class="n">1</span> 我的购物车</span>
+            <span class="line"></span>
+            <span class="step"><span class="n">2</span> 填写收货信息</span>
+            <span class="line"></span>
+            <span class="step"><span class="n">3</span> 下单完成</span>
+        </div>
+
+        @if (items.Any())
+        {
+            <div class="lx-cart-layout">
+                <div>
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3>购物车清单 · 共 @Model.TotalQuantity 件</h3>
+                            <button class="lx-act danger" type="button" data-cart-clear>@LXIcon.Trash(15) 清空购物车</button>
+                        </div>
+                        <div class="lx-card-body">
+                            @foreach (var line in items.Where(x => x.Product != null))
+                            {
+                                var product = line.Product;
+                                var maxQty = line.Amount + (product == null ? 0 : product.Amount);
+                                if (maxQty > 99) { maxQty = 99; }
+                                if (maxQty < line.Amount) { maxQty = line.Amount; }
+                                var detailUrl = product == null
+                                    ? Url.Action("ProductList", "Home")
+                                    : Url.Action("ProductDetail", "Home", new { id = product.Id });
+
+                                <div class="lx-line">
+                                    <a class="thumb" href="@detailUrl">
+                                        <img src="@Url.Action("GetImage", "Home", new { id = line.Product == null ? 0 : line.Product.Id })" alt="@(line.Product == null ? "商品" : line.Product.Name)" />
+                                    </a>
+
+                                    <div>
+                                        <a class="name" href="@detailUrl">@(line.Product == null ? "商品已下架" : product.Name)</a>
+                                        <div class="meta">
+                                            @if (product != null && product.ProductCategory != null)
+                                            {
+                                                <span class="lx-badge lx-badge-primary">@product.ProductCategory.Name</span>
+                                            }
+                                            @if (product != null)
+                                            {
+                                                <span>@product.Made</span>
+                                                <span>· 单价 @LXHelper.Money(product.Price)</span>
+                                            }
+                                        </div>
+                                        @if (product != null && product.Amount <= 0)
+                                        {
+                                            <div class="meta text-danger">库存已售罄，建议先移除该商品</div>
+                                        }
+                                        else if (product != null && product.Amount <= 5)
+                                        {
+                                            <div class="meta" style="color:var(--lx-warn);">库存紧张，仅剩 @product.Amount 件</div>
+                                        }
+                                    </div>
+
+                                    <div class="actions">
+                                        <span class="lx-qty" data-qty data-min="1" data-max="@maxQty">
+                                            <button class="minus" type="button" aria-label="减少">@LXIcon.Minus(16)</button>
+                                            <input type="text" inputmode="numeric" value="@line.Amount"
+                                                   data-cart-qty="@line.Product.Id" aria-label="购买数量" />
+                                            <button class="plus" type="button" aria-label="增加">@LXIcon.Plus(16)</button>
+                                        </span>
+                                        <div style="min-width:104px;text-align:right;">
+                                            <div class="lx-price lx-price-sm" data-line-total="@line.Product.Id">@LXHelper.Money(line.SubTotal)</div>
+                                        </div>
+                                        <button class="lx-act danger" type="button" data-cart-remove="@line.Product.Id" title="移除">@LXIcon.Trash(15)</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mt-3 flex-wrap" style="gap:12px;">
+                        <a class="lx-btn lx-btn-outline" href="@Url.Action("ProductList", "Home")">@LXIcon.ArrowRight(16) 继续购物</a>
+                        <div class="text-muted" style="font-size:13px;">
+                            @if (freeShipGap > 0)
+                            {
+                                <span>再买 @LXHelper.Money(freeShipGap) 即可免运费</span>
+                            }
+                            else
+                            {
+                                <span>已满足满 99 元免运费条件</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右边这个框是结算摘要 -->
+                <aside class="lx-sticky">
+                    <div class="lx-card">
+                        <div class="lx-card-head">
+                            <h3>订单摘要</h3>
+                        </div>
+                        <div class="lx-card-body">
+                            <div class="lx-summary-row">
+                                <span>商品件数</span>
+                                <span class="v">@Model.TotalQuantity 件</span>
+                            </div>
+                            <div class="lx-summary-row">
+                                <span>商品合计</span>
+                                <span class="v" data-subtotal>@LXHelper.Money(Model.SubTotal)</span>
+                            </div>
+                            <div class="lx-summary-row">
+                                <span>运费</span>
+                                <span class="v" data-shipfee>@(Model.ShipFee == 0m ? "免运费" : LXHelper.Money(Model.ShipFee))</span>
+                            </div>
+                            <div class="lx-summary-row total">
+                                <span>应付金额</span>
+                                <span class="v" data-payable>@LXHelper.Money(Model.Payable)</span>
+                            </div>
+
+                            <a class="lx-btn lx-btn-sale lx-btn-block lx-btn-lg mt-3" href="@Url.Action("Complete", "Order")">
+                                去结算 @LXIcon.ArrowRight(16)
+                            </a>
+                            <div class="lx-help text-center mt-2">满 99 元免运费 · 支持 7 天无理由退换</div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        }
+        else
+        {
+            <div class="lx-card">
+                <div class="lx-empty">
+                    <img src="@Url.Content("~/Content/Images/empty-cart.svg")" alt="购物车是空的" />
+                    <h4>购物车还是空的</h4>
+                    <p>快去挑几件喜欢的商品吧，加入购物车后就能一起结算。</p>
+                    <div class="lx-btn-group justify-content-center">
+                        <a class="lx-btn lx-btn-primary" href="@Url.Action("ProductList", "Home")">去逛逛</a>
+                        <a class="lx-btn lx-btn-outline" href="@Url.Action("ProductList", "Home", new { sort = "sales" })">看看热销榜</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

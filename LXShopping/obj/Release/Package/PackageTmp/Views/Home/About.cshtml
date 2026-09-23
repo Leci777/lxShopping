@@ -1,0 +1,68 @@
+@{
+    ViewBag.Title = "关于我们";
+}
+<div class="lx-crumb">
+    <div class="lx-container">
+        <a href="@Url.Action("Index", "Home")">首页</a>
+        <span class="sep">/</span>
+        <span class="now">关于我们</span>
+    </div>
+</div>
+
+<div class="lx-section">
+    <div class="lx-container">
+        <div class="lx-card">
+            <div class="lx-card-body">
+                <div class="d-flex align-items-center mb-4" style="gap:16px;flex-wrap:wrap;">
+                    <img src="@Url.Content("~/Content/Images/lx-mark.svg")" alt="LX 优选商城" style="width:64px;height:64px;border-radius:18px;" />
+                    <div>
+                        <h1 style="font-size:26px;">LX 优选商城</h1>
+                        <div class="text-muted">精选好物 · 优选生活</div>
+                    </div>
+                </div>
+
+                <p>
+                    LX 优选商城（LX Shopping）是一个面向大众消费者的综合类在线购物平台，覆盖
+                    <b>数码电子、家用电器、服饰鞋包、美妆个护、食品生鲜、家居生活、母婴玩具、运动户外</b>
+                    八大品类。我们坚持「少而精」的选品思路，每一件上架商品都要经过品控、价格与售后三项评估。
+                </p>
+                <p class="text-muted mb-4">
+                    平台由 LX 团队独立设计与开发，采用 ASP.NET MVC 5 + Entity Framework 6 构建，
+                    实现了会员注册与登录、商品浏览与搜索、购物车、在线下单、订单跟踪，以及完整的后台运营管理功能。
+                </p>
+
+                <div class="lx-promise mb-4">
+                    <div class="item">
+                        <span class="ico">@LXIcon.Shield(21)</span>
+                        <span><b>正品保障</b><span>官方渠道 假一赔十</span></span>
+                    </div>
+                    <div class="item">
+                        <span class="ico">@LXIcon.Truck(21)</span>
+                        <span><b>极速发货</b><span>48 小时内发出</span></span>
+                    </div>
+                    <div class="item">
+                        <span class="ico">@LXIcon.Refresh(21)</span>
+                        <span><b>7 天无理由</b><span>不满意即可退换</span></span>
+                    </div>
+                    <div class="item">
+                        <span class="ico">@LXIcon.Phone(21)</span>
+                        <span><b>贴心客服</b><span>09:00 - 21:00</span></span>
+                    </div>
+                </div>
+
+                <h3 class="mb-3">联系我们</h3>
+                <div class="lx-attr" style="grid-template-columns:1fr 1fr;">
+                    <div class="kv"><span class="k">客服热线</span><span class="v">023-6288 8999</span></div>
+                    <div class="kv"><span class="k">服务邮箱</span><span class="v">lx2042426989@163.com</span></div>
+                    <div class="kv"><span class="k">公司地址</span><span class="v">重庆市巴南区南泉街道重庆工程学院</span></div>
+                    <div class="kv"><span class="k">服务时间</span><span class="v">09:00 - 21:00（全年无休）</span></div>
+                </div>
+
+                <div class="lx-btn-group mt-4">
+                    <a class="lx-btn lx-btn-primary" href="@Url.Action("ProductList", "Home")">开始选购</a>
+                    <a class="lx-btn lx-btn-outline" href="@Url.Action("Register", "Member")">注册会员</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+@{
+    Layout = "~/Views/Shared/_Layout-Admin.cshtml";
+    ViewBag.Title = "关于项目";
+    ViewBag.PageTitle = "关于项目";
+    ViewBag.PageSub = "LX 优选商城说明";
+    var adminCount = (int)(ViewBag.AdminCount ?? 0);
+    var memberCount = (int)(ViewBag.MemberCount ?? 0);
+    var productCount = (int)(ViewBag.ProductCount ?? 0);
+    var orderCount = (int)(ViewBag.OrderCount ?? 0);
+    var modules = new[]
+    {
+        new { T = "会员中心", D = "注册 / 登录 / 邮箱验证、资料与头像维护、收货地址增删、修改密码" },
+        new { T = "商品浏览", D = "首页推荐、分类筛选、关键词搜索、多字段排序、分页、商品详情与相关推荐" },
+        new { T = "购物车", D = "加购即锁库存、数量增减实时计价、单行移除、一键清空、满 99 免运费" },
+        new { T = "订单流程", D = "地址选择 / 新地址下单、订单提交、下单成功页、订单状态跟踪与快递单号" },
+        new { T = "后台运营", D = "仪表盘、商品与类别管理、用户管理、订单发货与取消、库存预警" }
+    };
+}
+<div class="lx-about-hero mb-3">
+    <div class="lv">@LXIcon.Spark(72)</div>
+    <h2>LX 优选商城 · 管理后台</h2>
+    <p>
+        这是一套完整的电商购物系统。
+    </p>
+    <div class="d-flex flex-wrap mt-3" style="gap:10px;">
+        <span class="lx-badge lx-badge-ink">v1.0</span>
+        <span class="lx-badge lx-badge-ink">课程实践作品</span>
+        <span class="lx-badge lx-badge-ink">谢谢！</span>
+    </div>
+</div>
+<div class="lx-mini-stats mb-3">
+    <div class="m">
+        <div class="k">管理员账号</div>
+        <div class="v">@adminCount</div>
+    </div>
+    <div class="m">
+        <div class="k">注册会员</div>
+        <div class="v">@memberCount</div>
+    </div>
+    <div class="m">
+        <div class="k">商品数量</div>
+        <div class="v">@productCount</div>
+    </div>
+    <div class="m">
+        <div class="k">订单数量</div>
+        <div class="v">@orderCount</div>
+    </div>
+</div>
+<div class="lx-card">
+    <div class="lx-card-head">
+        <h3>功能模块</h3>
+    </div>
+    <div class="lx-card-body">
+        <div class="lx-table-wrap">
+            <table class="lx-table">
+                <thead>
+                    <tr>
+                        <th style="width:150px;">模块</th>
+                        <th>能力说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in modules)
+                    {
+                        <tr>
+                            <td class="strong">@m.T</td>
+                            <td>@m.D</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LXShopping", "LXShopping\LXShopping.csproj", "{3F1B7C4E-5D2A-4B88-9E31-7A6C0D5F2B41}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F1B7C4E-5D2A-4B88-9E31-7A6C0D5F2B41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F1B7C4E-5D2A-4B88-9E31-7A6C0D5F2B41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F1B7C4E-5D2A-4B88-9E31-7A6C0D5F2B41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F1B7C4E-5D2A-4B88-9E31-7A6C0D5F2B41}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B4C2A9D1-6E3F-4C77-A815-9D2E7F1B4C63}
+	EndGlobalSection
+EndGlobal

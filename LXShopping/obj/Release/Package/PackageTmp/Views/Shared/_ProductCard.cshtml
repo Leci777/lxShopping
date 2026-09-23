@@ -1,0 +1,59 @@
+@model LXShopping.Models.Product
+@{
+    var p = Model;
+    var soldOut = p.Amount <= 0;
+    var hasDeal = p.OriginalPrice.HasValue && p.OriginalPrice.Value > p.Price;
+    var cut = hasDeal ? (int)Math.Round((1 - p.Price / p.OriginalPrice.Value) * 100) : 0;
+    var detailUrl = Url.Action("ProductDetail", "Home", new { id = p.Id });
+    var categoryName = p.ProductCategory == null ? "" : p.ProductCategory.Name;
+}
+<div class="lx-pcard @(soldOut ? "is-out" : "")">
+    <a class="media" href="@detailUrl" title="@p.Name">
+        <div class="flags">
+            @if (soldOut)
+            {
+                <span class="lx-badge lx-badge-grey">已售罄</span>
+            }
+            else if (hasDeal && cut > 0)
+            {
+                <span class="lx-badge lx-badge-sale">立减 @cut%</span>
+            }
+            @if (p.Sales >= 500)
+            {
+                <span class="lx-badge lx-badge-teal">热销</span>
+            }
+        </div>
+        <img src="@Url.Action("GetImage", "Home", new { id = p.Id })" alt="@p.Name" loading="lazy" />
+    </a>
+    <div class="body">
+        <a class="name" href="@detailUrl">@p.Name</a>
+        <div class="sub">
+            @if (!string.IsNullOrEmpty(categoryName))
+            {
+                <span class="lx-badge lx-badge-primary">@categoryName</span>
+            }
+            <span>@p.Made</span>
+        </div>
+        <div class="desc">@p.Description</div>
+        <div class="foot">
+            <div>
+                <span class="lx-price"><small>¥</small>@p.Price.ToString("N2")</span>
+                @if (hasDeal)
+                {
+                    <span class="lx-price-old">¥@p.OriginalPrice.Value.ToString("N2")</span>
+                }
+                <div class="lx-sold">已售 @p.Sales 件</div>
+            </div>
+            @if (soldOut)
+            {
+                <button class="lx-btn lx-btn-primary lx-btn-sm" type="button" disabled>已售罄</button>
+            }
+            else
+            {
+                <button class="lx-btn lx-btn-primary lx-btn-sm" type="button" data-add-cart="@p.Id" title="加入购物车">
+                    @LXIcon.Cart(16) 加购
+                </button>
+            }
+        </div>
+    </div>
+</div>

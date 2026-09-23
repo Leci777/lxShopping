@@ -1,0 +1,226 @@
+@model LXShopping.Models.HomeViewModel
+@{
+    ViewBag.Title = Model.Search != null ? "搜索「" + Model.Search + "」" : null;
+    var keyword = Model.Search;
+    var searching = !string.IsNullOrWhiteSpace(keyword);
+    var categories = Model.Categories ?? new List<LXShopping.Models.ProductCategory>();
+    var hasHot = Model.HotProducts != null && Model.HotProducts.Any();
+    var hasNew = Model.NewProducts != null && Model.NewProducts.Any();
+}
+
+@if (searching)
+{
+    <div class="lx-crumb">
+        <div class="lx-container">
+            <a href="@Url.Action("Index", "Home")">首页</a>
+            <span class="sep">/</span>
+            <span class="now">搜索「@keyword」</span>
+        </div>
+    </div>
+
+    <div class="lx-section">
+        <div class="lx-container">
+            <div class="lx-section-head">
+                <div>
+                    <h1 class="lx-section-title"><span class="bar"></span>搜索结果</h1>
+                    <div class="lx-section-sub">关键词「@keyword」，共找到 @Model.Products.TotalItemCount 件商品</div>
+                </div>
+                <a class="lx-btn lx-btn-outline lx-btn-sm" href="@Url.Action("Index", "Home")">清空搜索</a>
+            </div>
+            @if (Model.Products.Any())
+            {
+                <div class="lx-grid lx-grid-4">
+                    @foreach (var item in Model.Products)
+                    {
+                        @Html.Partial("_ProductCard", item)
+                    }
+                </div>
+                @Html.LxPager(Model.Products, new { search = keyword })
+            }
+            else
+            {
+                <div class="lx-empty">
+                    <img src="@Url.Content("~/Content/Images/empty-box.svg")" alt="没有找到商品" />
+                    <h4>没有找到相关商品</h4>
+                    <p>换个关键词试试，或者到全部商品里逛逛。</p>
+                    <a class="lx-btn lx-btn-primary" href="@Url.Action("ProductList", "Home")">浏览全部商品</a>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (!searching)
+{
+    <section class="lx-hero">
+        <div class="lx-container">
+            <div class="lx-hero-inner">
+                <div class="lx-hero-main">
+                    <div id="lxHero" class="carousel slide" data-ride="carousel" data-interval="4800">
+                        <ol class="carousel-indicators">
+                            <li data-target="#lxHero" data-slide-to="0" class="active"></li>
+                            <li data-target="#lxHero" data-slide-to="1"></li>
+                            <li data-target="#lxHero" data-slide-to="2"></li>
+                        </ol>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="@Url.Content("~/Content/Images/hero-1.svg")" alt="LX 年度旗舰新品首发" />
+                            </div>
+                            <div class="carousel-item">
+                                <img src="@Url.Content("~/Content/Images/hero-2.svg")" alt="会员专享 满 99 免运费" />
+                            </div>
+                            <div class="carousel-item">
+                                <img src="@Url.Content("~/Content/Images/hero-3.svg")" alt="八大品类 精选好物" />
+                            </div>
+                        </div>
+                        <a class="carousel-control-prev" href="#lxHero" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">上一张</span>
+                        </a>
+                        <a class="carousel-control-next" href="#lxHero" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">下一张</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lx-hero-side">
+                    <div class="lx-promo lx-promo-a">
+                        <span class="tag">MEMBER</span>
+                        <h4>会员专享 满 99 免运费</h4>
+                        <p>注册即享会员价，全场满 99 元包邮到家，7 天无理由退换。</p>
+                        <a class="lx-link" href="@Url.Action("Register", "Member")">立即注册 @LXIcon.ArrowRight(15)</a>
+                    </div>
+                    <div class="lx-promo lx-promo-b">
+                        <span class="tag">HOT SALE</span>
+                        <h4>热销榜 TOP 8</h4>
+                        <p>近 30 天最受欢迎的好物，跟着大家买不会错。</p>
+                        <a class="lx-link" href="@Url.Action("ProductList", "Home", new { sort = "sales" })">去看看 @LXIcon.ArrowRight(15)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lx-section-tight">
+        <div class="lx-container">
+            <div class="lx-promise">
+                <div class="item">
+                    <span class="ico">@LXIcon.Shield(21)</span>
+                    <span><b>正品保障</b><span>官方渠道 假一赔十</span></span>
+                </div>
+                <div class="item">
+                    <span class="ico">@LXIcon.Truck(21)</span>
+                    <span><b>极速发货</b><span>当日下单 48h 内发出</span></span>
+                </div>
+                <div class="item">
+                    <span class="ico">@LXIcon.Refresh(21)</span>
+                    <span><b>7 天无理由</b><span>不满意即可退换</span></span>
+                </div>
+                <div class="item">
+                    <span class="ico">@LXIcon.Phone(21)</span>
+                    <span><b>贴心客服</b><span>09:00 - 21:00 在线</span></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lx-section">
+        <div class="lx-container">
+            <div class="lx-section-head">
+                <div>
+                    <h2 class="lx-section-title"><span class="bar"></span>逛分类</h2>
+                    <div class="lx-section-sub">@Model.TotalCategoryCount 个品类 · @Model.TotalProductCount 件在售好物</div>
+                </div>
+                <a class="lx-more" href="@Url.Action("ProductList", "Home")">全部商品 @LXIcon.ArrowRight(15)</a>
+            </div>
+
+            <div class="lx-cat-grid">
+                @foreach (var c in categories)
+                {
+                    <a class="lx-cat-card lx-reveal" href="@Url.Action("ProductList", "Home", new { id = c.Id })">
+                        <span class="ico">@LXIcon.Category(c.Icon, 24)</span>
+                        <b>@c.Name</b>
+                        <span>@c.OnShelfCount 件在售</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (hasHot && !searching)
+{
+    <section class="lx-section lx-bg-white">
+        <div class="lx-container">
+            <div class="lx-section-head">
+                <div>
+                    <h2 class="lx-section-title"><span class="bar"></span>热销榜</h2>
+                    <div class="lx-section-sub">大家都在买，闭眼入不踩雷</div>
+                </div>
+                <a class="lx-more" href="@Url.Action("ProductList", "Home", new { sort = "sales" })">查看完整榜单 @LXIcon.ArrowRight(15)</a>
+            </div>
+            <div class="lx-grid lx-grid-4">
+                @foreach (var item in Model.HotProducts)
+                {
+                    @Html.Partial("_ProductCard", item)
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (hasNew && !searching)
+{
+    <section class="lx-section">
+        <div class="lx-container">
+            <div class="lx-section-head">
+                <div>
+                    <h2 class="lx-section-title"><span class="bar"></span>新品上架</h2>
+                    <div class="lx-section-sub">刚刚到货，抢先一步体验</div>
+                </div>
+                <a class="lx-more" href="@Url.Action("ProductList", "Home", new { sort = "new" })">更多新品 @LXIcon.ArrowRight(15)</a>
+            </div>
+            <div class="lx-grid lx-grid-4">
+                @foreach (var item in Model.NewProducts)
+                {
+                    @Html.Partial("_ProductCard", item)
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (!searching)
+{
+    <section class="lx-section lx-bg-white">
+        <div class="lx-container">
+            <div class="lx-section-head">
+                <div>
+                    <h2 class="lx-section-title"><span class="bar"></span>全部商品</h2>
+                    <div class="lx-section-sub">共 @Model.Products.TotalItemCount 件在售商品</div>
+                </div>
+                <a class="lx-more" href="@Url.Action("ProductList", "Home")">进入商品列表 @LXIcon.ArrowRight(15)</a>
+            </div>
+
+            @if (Model.Products.Any())
+            {
+                <div class="lx-grid lx-grid-4">
+                    @foreach (var item in Model.Products)
+                    {
+                        @Html.Partial("_ProductCard", item)
+                    }
+                </div>
+                @Html.LxPager(Model.Products)
+            }
+            else
+            {
+                <div class="lx-empty">
+                    <img src="@Url.Content("~/Content/Images/empty-box.svg")" alt="暂无商品" />
+                    <h4>商城还没有上架商品</h4>
+                    <p>请先到管理后台添加商品，或稍后再来看看。</p>
+                </div>
+            }
+        </div>
+    </section>
+}

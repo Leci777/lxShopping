@@ -1,0 +1,100 @@
+@model PagedList.IPagedList<LXShopping.Models.Member>
+@{
+    Layout = "~/Views/Shared/_Layout-Admin.cshtml";
+    ViewBag.Title = "用户管理";
+    ViewBag.PageTitle = "用户管理";
+    ViewBag.PageSub = "会员账号、认证状态与密码维护";
+
+    var keyword = ViewBag.Keyword as string;
+    var users = Model;
+}
+<div class="lx-page-head">
+    <div>
+        <h2>用户管理</h2>
+        <p>共 @users.TotalItemCount 位注册会员@(string.IsNullOrWhiteSpace(keyword) ? "" : "，搜索关键词「" + keyword + "」")</p>
+    </div>
+    <div class="lx-actions">
+        <form class="lx-input-icon" action="@Url.Action("Users", "Admin")" method="get" style="width:260px;">
+            <span class="ico">@LXIcon.Search(18)</span>
+            <input class="lx-input" type="search" name="user" value="@keyword" placeholder="搜索邮箱 / 姓名 / 用户名" />
+        </form>
+        <a class="lx-btn lx-btn-primary lx-btn-sm" href="@Url.Action("UserCreate", "Admin")">@LXIcon.Plus(15) 新增用户</a>
+    </div>
+</div>
+
+<div class="lx-card">
+    <div class="lx-card-head">
+        <h3>会员列表</h3>
+        <span class="text-muted" style="font-size:12.5px;">第 @users.PageNumber / @users.PageCount 页</span>
+    </div>
+    <div class="lx-card-body">
+        @if (users.Any())
+        {
+            <div class="lx-table-wrap">
+                <table class="lx-table">
+                    <thead>
+                        <tr>
+                            <th style="width:64px;">头像</th>
+                            <th>会员</th>
+                            <th>邮箱账号</th>
+                            <th>注册时间</th>
+                            <th>邮箱认证</th>
+                            <th style="text-align:right;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in users)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="lx-avatar" style="width:38px;height:38px;border-radius:11px;font-size:15px;">
+                                        @if (m.ImageData != null && m.ImageData.Length > 0)
+                                        {
+                                            <img src="@Url.Action("GetImage", "Member", new { id = m.Id })" alt="头像" />
+                                        }
+                                        else
+                                        {
+                                            @m.Initial
+                                        }
+                                    </span>
+                                </td>
+                                <td>
+                                    <a class="strong" href="@Url.Action("UserEdit", "Admin", new { id = m.Id })">@m.Nickname</a>
+                                    <div class="text-muted" style="font-size:12px;">@m.Name · 编号 U-@m.Id.ToString("D5")</div>
+                                </td>
+                                <td>@m.Email</td>
+                                <td class="nowrap">@m.RegisterOn.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>
+                                    <span class="lx-badge @(m.AuthCode == null ? "lx-badge-ok" : "lx-badge-warn")">
+                                        @(m.AuthCode == null ? "已认证" : "待认证")
+                                    </span>
+                                </td>
+                                <td style="text-align:right;">
+                                    <div class="lx-actions" style="justify-content:flex-end;">
+                                        <a class="lx-act" href="@Url.Action("UserEdit", "Admin", new { id = m.Id })">@LXIcon.Edit(14) 编辑</a>
+                                        @if (m.AuthCode != null)
+                                        {
+                                            <button class="lx-act ok" type="button" data-admin-user-auth="@m.Id">通过认证</button>
+                                        }
+                                        <button class="lx-act warn" type="button" data-admin-user-reset="@m.Id">重置密码</button>
+                                        <button class="lx-act danger" type="button" data-admin-user-delete="@m.Id">@LXIcon.Trash(14)</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @Html.LxPager(users, new { user = keyword })
+        }
+        else
+        {
+            <div class="lx-empty">
+                <img src="@Url.Content("~/Content/Images/empty-box.svg")" alt="暂无用户" />
+                <h4>没有找到会员</h4>
+                <p>@(string.IsNullOrWhiteSpace(keyword) ? "还没有会员注册。" : "换个关键词再试试。")</p>
+            </div>
+        }
+    </div>
+</div>

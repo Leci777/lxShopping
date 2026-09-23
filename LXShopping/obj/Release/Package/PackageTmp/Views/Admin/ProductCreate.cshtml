@@ -1,0 +1,160 @@
+@model LXShopping.Models.Product
+@{
+    Layout = "~/Views/Shared/_Layout-Admin.cshtml";
+    ViewBag.Title = "新增商品";
+    ViewBag.PageTitle = "新增商品";
+    ViewBag.PageSub = "填写商品资料并上传图片，保存后立即上架";
+
+    var categories = ViewBag.ProductCategories as IList<LXShopping.Models.ProductCategory>
+                     ?? new List<LXShopping.Models.ProductCategory>();
+}
+<div class="lx-page-head">
+    <div>
+        <h2>新增商品</h2>
+        <p>商品保存后会直接上架到前台商城</p>
+    </div>
+    <div class="lx-actions">
+        <a class="lx-btn lx-btn-outline lx-btn-sm" href="@Url.Action("Products", "Admin")">@LXIcon.ArrowRight(15) 返回列表</a>
+    </div>
+</div>
+
+@if (!categories.Any())
+{
+    <div class="lx-card mb-3">
+        <div class="lx-card-body">
+            <p class="mb-2"><b>还没有任何商品类别。</b>请先到「商品管理」页创建至少一个类别，然后才能新增商品。</p>
+            <a class="lx-btn lx-btn-primary lx-btn-sm" href="@Url.Action("Products", "Admin")">去创建类别</a>
+        </div>
+    </div>
+}
+
+@using (Html.BeginForm("ProductCreate", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="lx-card mb-3">
+        <div class="lx-card-head">
+            <h3>基本信息</h3>
+        </div>
+        <div class="lx-card-body">
+            <div class="lx-form-grid">
+                <div class="lx-field">
+                    <label class="lx-label" for="Name">商品名称<span class="req">*</span></label>
+                    <input class="lx-input" type="text" id="Name" name="Name" maxlength="60" required
+                           placeholder="例如：LX Pro 主动降噪无线耳机" />
+                    <div class="lx-help">最多 60 个字</div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="ProductCategoryName">商品类别<span class="req">*</span></label>
+                    <select class="lx-select" id="ProductCategoryName" name="ProductCategoryName" required>
+                        <option value="">请选择商品类别</option>
+                        @foreach (var c in categories)
+                        {
+                            <option value="@c.Name">@c.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Made">制造商<span class="req">*</span></label>
+                    <input class="lx-input" type="text" id="Made" name="Made" maxlength="60" required
+                           placeholder="例如：LXAUDIO" />
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="PublishOn">上架时间</label>
+                    <input class="lx-input" type="date" id="PublishOn" name="PublishOn"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="lx-field span2">
+                    <label class="lx-label" for="Description">商品简介<span class="req">*</span></label>
+                    <textarea class="lx-textarea" id="Description" name="Description" maxlength="250" required
+                              placeholder="用一两句话说明商品的核心卖点，最多 250 个字"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-card mb-3">
+        <div class="lx-card-head">
+            <h3>价格与库存</h3>
+        </div>
+        <div class="lx-card-body">
+            <div class="lx-form-grid">
+                <div class="lx-field">
+                    <label class="lx-label" for="Price">商品售价（元）<span class="req">*</span></label>
+                    <input class="lx-input" type="number" id="Price" name="Price" step="0.01" min="0.01" max="1000000" required
+                           placeholder="例如：899.00" />
+                    <div class="lx-help">取值区间 0.01 ~ 1,000,000</div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="OriginalPrice">市场原价（元）</label>
+                    <input class="lx-input" type="number" id="OriginalPrice" name="OriginalPrice" step="0.01" min="0"
+                           placeholder="选填，用于展示划线价与折扣标签" />
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Amount">库存数量<span class="req">*</span></label>
+                    <input class="lx-input" type="number" id="Amount" name="Amount" min="0" max="1000000" required
+                           placeholder="例如：120" />
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label">预计折扣</label>
+                    <div class="lx-input" id="discountPreview" style="display:flex;align-items:center;color:var(--lx-muted);">填写售价与原价后自动计算</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-card mb-3">
+        <div class="lx-card-head">
+            <h3>商品图片</h3>
+            <span class="text-muted" style="font-size:12.5px;">懒得传图片也没事，会自动生成一张默认的顶上</span>
+        </div>
+        <div class="lx-card-body">
+            <div class="lx-upload">
+                <div class="preview" id="imagePreview">
+                    <span>暂无图片</span>
+                </div>
+                <div>
+                    <label class="lx-btn lx-btn-outline lx-btn-sm pick">
+                        选择图片
+                        <input type="file" name="image" accept="image/*"
+                               data-upload-preview="#imagePreview" data-upload-name="#imageName" />
+                    </label>
+                    <div class="filename" id="imageName">未选择文件</div>
+                    <div class="lx-help">支持 JPG / PNG / GIF / BMP / WEBP，建议使用 1:1 正方形图片，不超过 4MB。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lx-actions">
+        <button class="lx-btn lx-btn-primary" type="submit">保存并上架</button>
+        <a class="lx-btn lx-btn-outline" href="@Url.Action("Products", "Admin")">取消</a>
+    </div>
+}
+
+@section scripts {
+    <script>
+        (function ($) {
+            function refresh() {
+                var price = parseFloat($("#Price").val());
+                var original = parseFloat($("#OriginalPrice").val());
+                var $box = $("#discountPreview");
+                if (price > 0 && original > price) {
+                    var cut = Math.round((1 - price / original) * 100);
+                    $box.text("立减 " + cut + "%（原价 ¥" + original.toFixed(2) + "）").css("color", "var(--lx-sale)");
+                } else {
+                    $box.text("填写售价与原价后自动计算").css("color", "var(--lx-muted)");
+                }
+            }
+            $("#Price, #OriginalPrice").on("input", refresh);
+            refresh();
+        })(window.jQuery);
+    </script>
+}

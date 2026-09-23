@@ -1,0 +1,259 @@
+@{
+    Layout = "~/Views/Shared/_Layout-Admin.cshtml";
+    ViewBag.Title = "订单管理";
+    ViewBag.PageTitle = "订单管理";
+    ViewBag.PageSub = "订单查询、发货与取消";
+
+    var keyword = ViewBag.Keyword as string;
+    var tab = (Request.QueryString["tab"] ?? "orders").ToLowerInvariant();
+    if (tab != "shipped" && tab != "unshipped" && tab != "carts") { tab = "orders"; }
+
+    var orders = ViewData["Orders"] as PagedList.IPagedList<LXShopping.Models.OrderHeader>;
+    var shipped = ViewData["Shippedorders"] as PagedList.IPagedList<LXShopping.Models.OrderDetail>;
+    var unshipped = ViewData["Unshippedorders"] as PagedList.IPagedList<LXShopping.Models.OrderDetail>;
+    var carts = ViewData["AddShoppingCart"] as PagedList.IPagedList<LXShopping.Models.Cart>;
+
+    Func<string, string> tabLink = t => Url.Action("Ordermanagement", "Admin", new { tab = t, keyword = keyword });
+}
+<div class="lx-page-head">
+    <div>
+        <h2>订单管理</h2>
+        <p>按下单顺序实时展示，发货后买家可在个人中心查看快递单号</p>
+    </div>
+    <div class="lx-actions">
+        <form class="lx-input-icon" action="@Url.Action("Ordermanagement", "Admin")" method="get" style="width:280px;">
+            <input type="hidden" name="tab" value="@tab" />
+            <span class="ico">@LXIcon.Search(18)</span>
+            <input class="lx-input" type="search" name="keyword" value="@keyword" placeholder="搜索订单号 / 用户名 / 收件人" />
+        </form>
+    </div>
+</div>
+
+<div class="lx-admin-tabs">
+    <a class="@(tab == "orders" ? "active" : "")" href="@tabLink("orders")">
+        @LXIcon.Orders(15) 订单总览
+        @if (orders != null) { <span class="n">@orders.TotalItemCount</span> }
+    </a>
+    <a class="@(tab == "unshipped" ? "active" : "")" href="@tabLink("unshipped")">
+        @LXIcon.Truck(15) 待发货明细
+        @if (unshipped != null) { <span class="n">@unshipped.TotalItemCount</span> }
+    </a>
+    <a class="@(tab == "shipped" ? "active" : "")" href="@tabLink("shipped")">
+        @LXIcon.Check(15) 已发货明细
+        @if (shipped != null) { <span class="n">@shipped.TotalItemCount</span> }
+    </a>
+    <a class="@(tab == "carts" ? "active" : "")" href="@tabLink("carts")">
+        @LXIcon.Cart(15) 购物车商品
+        @if (carts != null) { <span class="n">@carts.TotalItemCount</span> }
+    </a>
+</div>
+
+@if (tab == "orders")
+{
+    <div class="lx-card">
+        <div class="lx-card-head">
+            <h3>订单总览</h3>
+            @if (orders != null)
+            {
+                <span class="text-muted" style="font-size:12.5px;">第 @orders.PageNumber / @orders.PageCount 页</span>
+            }
+        </div>
+        <div class="lx-card-body">
+            @if (orders != null && orders.Any())
+            {
+                <div class="lx-table-wrap">
+                    <table class="lx-table">
+                        <thead>
+                            <tr>
+                                <th>订单号</th>
+                                <th>收件人 / 会员</th>
+                                <th>下单时间</th>
+                                <th style="text-align:center;">商品</th>
+                                <th>状态</th>
+                                <th style="text-align:right;">订单金额</th>
+                                <th style="text-align:right;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in orders)
+                            {
+                                var member = o.MemberAddress == null ? null : o.MemberAddress.Member;
+                                <tr>
+                                    <td class="strong nowrap">@o.OrderNo</td>
+                                    <td>
+                                        @(o.MemberAddress == null ? "—" : o.MemberAddress.ContactName)
+                                        <div class="text-muted" style="font-size:12px;">
+                                            @(member == null ? "" : member.Nickname + " · " + member.Email)
+                                        </div>
+                                    </td>
+                                    <td class="nowrap">@o.BuyOn.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td style="text-align:center;">@o.TotalQuantity 件</td>
+                                    <td>
+                                        <span class="lx-badge @(o.IsAllShipped ? "lx-badge-ok" : "lx-badge-warn")">@o.StatusText</span>
+                                    </td>
+                                    <td style="text-align:right;" class="strong nowrap">@LXHelper.Money(o.TotalPrice)</td>
+                                    <td style="text-align:right;">
+                                        <div class="lx-actions" style="justify-content:flex-end;">
+                                            <a class="lx-act" href="@Url.Action("Orderdetails", "Admin", new { id = o.Id })">@LXIcon.Eye(14) 查看明细</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @Html.LxPager(orders, new { tab = "orders", keyword = keyword })
+            }
+            else
+            {
+                <p class="text-muted mb-0">没有符合条件的订单。</p>
+            }
+        </div>
+    </div>
+}
+else if (tab == "unshipped" || tab == "shipped")
+{
+    var data = tab == "unshipped" ? unshipped : shipped;
+    var isUnshipped = tab == "unshipped";
+    <div class="lx-card">
+        <div class="lx-card-head">
+            <h3>@(isUnshipped ? "待发货明细" : "已发货明细")</h3>
+            <span class="text-muted" style="font-size:12.5px;">
+                @(isUnshipped ? "点击「发货」会自动生成快递单号" : "点击「取消订单」会回滚库存与销量")
+            </span>
+        </div>
+        <div class="lx-card-body">
+            @if (data != null && data.Any())
+            {
+                <div class="lx-table-wrap">
+                    <table class="lx-table">
+                        <thead>
+                            <tr>
+                                <th>订单号</th>
+                                <th>商品</th>
+                                <th style="text-align:center;">数量</th>
+                                <th style="text-align:right;">小计</th>
+                                <th>快递单号</th>
+                                <th style="text-align:right;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var d in data)
+                            {
+                                var pname = string.IsNullOrEmpty(d.ProductName)
+                                    ? (d.Product == null ? "商品" : d.Product.Name)
+                                    : d.ProductName;
+                                <tr>
+                                    <td class="nowrap">
+                                        @if (d.OrderHeader != null)
+                                        {
+                                            <a class="strong" href="@Url.Action("Orderdetails", "Admin", new { id = d.OrderHeader.Id })">@d.OrderHeader.OrderNo</a>
+                                            <div class="text-muted" style="font-size:12px;">@d.OrderHeader.BuyOn.ToString("MM-dd HH:mm")</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="strong">@pname</div>
+                                        <div class="text-muted" style="font-size:12px;">
+                                            @(d.Product == null || d.Product.ProductCategory == null ? "" : d.Product.ProductCategory.Name)
+                                            · 单价 @LXHelper.Money(d.UnitPrice)
+                                        </div>
+                                    </td>
+                                    <td style="text-align:center;">@d.Amount</td>
+                                    <td style="text-align:right;" class="strong nowrap">@LXHelper.Money(d.Price)</td>
+                                    <td class="nowrap">
+                                        @if (d.IsShipped)
+                                        {
+                                            <span class="lx-badge lx-badge-ok">@d.Shipmentnumber</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="lx-badge lx-badge-grey">未发货</span>
+                                        }
+                                    </td>
+                                    <td style="text-align:right;">
+                                        <div class="lx-actions" style="justify-content:flex-end;">
+                                            @if (d.IsShipped)
+                                            {
+                                                <span class="lx-act" style="cursor:default;">@LXIcon.Check(14) 已完成发货</span>
+                                            }
+                                            else
+                                            {
+                                                <button class="lx-act ok" type="button" data-admin-ship="@d.Id">@LXIcon.Truck(14) 发货</button>
+                                                <button class="lx-act danger" type="button" data-admin-order-delete="@d.Id">@LXIcon.Trash(14) 取消订单</button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @Html.LxPager(data, new { tab = tab, keyword = keyword }, isUnshipped ? "p2" : "p1")
+
+            }
+            else
+            {
+                <p class="text-muted mb-0">@(isUnshipped ? "当前没有待发货的商品明细。" : "当前没有已发货的商品明细。")</p>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="lx-card">
+        <div class="lx-card-head">
+            <h3>购物车中的商品</h3>
+            <span class="text-muted" style="font-size:12.5px;">这些商品已被会员锁定库存，尚未下单</span>
+        </div>
+        <div class="lx-card-body">
+            @if (carts != null && carts.Any())
+            {
+                <div class="lx-table-wrap">
+                    <table class="lx-table">
+                        <thead>
+                            <tr>
+                                <th>会员</th>
+                                <th>商品</th>
+                                <th>类别</th>
+                                <th style="text-align:center;">数量</th>
+                                <th style="text-align:right;">小计</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in carts)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="strong">@(c.Member == null ? "—" : c.Member.Nickname)</div>
+                                        <div class="text-muted" style="font-size:12px;">@(c.Member == null ? "" : c.Member.Email)</div>
+                                    </td>
+                                    <td class="strong">@(c.Product == null ? "—" : c.Product.Name)</td>
+                                    <td>
+                                        @if (c.Product != null && c.Product.ProductCategory != null)
+                                        {
+                                            <span class="lx-badge lx-badge-primary">@c.Product.ProductCategory.Name</span>
+                                        }
+                                    </td>
+                                    <td style="text-align:center;">@c.Amount</td>
+                                    <td style="text-align:right;" class="strong nowrap">@LXHelper.Money(c.SubTotal)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @Html.LxPager(carts, new { tab = "carts", keyword = keyword }, "p3")
+            }
+            else
+            {
+                <p class="text-muted mb-0">当前没有用户把商品放在购物车里。</p>
+            }
+        </div>
+    </div>
+}

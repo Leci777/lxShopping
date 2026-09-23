@@ -1,0 +1,138 @@
+@model LXShopping.Models.Member
+@{
+    Layout = "~/Views/Shared/_Layout-Auth.cshtml";
+    ViewBag.Title = "免费注册";
+}
+<div class="lx-auth">
+    <div class="lx-auth-left">
+        <div class="top">
+            <img src="@Url.Content("~/Content/Images/lx-mark-white.svg")" alt="LX" />
+            <div>
+                <b>LX 优选</b>
+                <span>SHOPPING</span>
+            </div>
+        </div>
+
+        <div class="mid">
+            <h2>注册 LX 会员<br />开启优选生活</h2>
+            <p>只需 30 秒即可完成注册，马上享受会员专属价格、订单实时跟踪与 7 天无理由退换服务。</p>
+            <div class="feats">
+                <div class="f"><i>@LXIcon.Check(14)</i> 注册即享会员价，购物更省</div>
+                <div class="f"><i>@LXIcon.Check(14)</i> 购物车与订单云端同步</div>
+                <div class="f"><i>@LXIcon.Check(14)</i> 八大品类，一站买齐</div>
+            </div>
+        </div>
+
+        <div class="bottom">© @DateTime.Now.Year LX 优选商城 · 精选好物，优选生活</div>
+    </div>
+
+    <div class="lx-auth-right">
+        <a class="lx-auth-back" href="@Url.Action("Index", "Home")">@LXIcon.ArrowRight(14) 返回首页</a>
+
+        <div class="lx-auth-card">
+            <h3>创建新账号</h3>
+            <p class="lead">填写以下信息，立即成为 LX 优选商城会员</p>
+
+            @using (Html.BeginForm("Register", "Member", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors mb-3" })
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Email">邮箱账号<span class="req">*</span></label>
+                    <div class="lx-input-icon">
+                        <span class="ico">@LXIcon.Spark(18)</span>
+                        @Html.EditorFor(m => m.Email, new
+                        {
+                            htmlAttributes = new
+                            {
+                                @class = "lx-input",
+                                placeholder = "用于登录，例如 you@example.com",
+                                autocomplete = "email"
+                            }
+                        })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "lx-msg" })
+                </div>
+
+                <div class="lx-form-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">
+                    <div class="lx-field">
+                        <label class="lx-label" for="Name">中文姓名<span class="req">*</span></label>
+                        @Html.EditorFor(m => m.Name, new
+                        {
+                            htmlAttributes = new { @class = "lx-input", placeholder = "如：李鑫", maxlength = "5" }
+                        })
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "lx-msg" })
+                    </div>
+                    <div class="lx-field">
+                        <label class="lx-label" for="Nickname">用户名<span class="req">*</span></label>
+                        @Html.EditorFor(m => m.Nickname, new
+                        {
+                            htmlAttributes = new { @class = "lx-input", placeholder = "如：LX用户", maxlength = "10" }
+                        })
+                        @Html.ValidationMessageFor(m => m.Nickname, "", new { @class = "lx-msg" })
+                    </div>
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="Password">登录密码<span class="req">*</span></label>
+                    <div class="lx-input-icon">
+                        <span class="ico">@LXIcon.Shield(18)</span>
+                        @Html.EditorFor(m => m.Password, new
+                        {
+                            htmlAttributes = new
+                            {
+                                @class = "lx-input",
+                                placeholder = "6 ~ 20 位，建议字母与数字组合",
+                                autocomplete = "new-password",
+                                minlength = "6"
+                            }
+                        })
+                        <button type="button" class="act" data-toggle-pwd="#Password" title="显示密码">@LXIcon.Eye(18)</button>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "lx-msg" })
+                </div>
+
+                <div class="lx-field">
+                    <label class="lx-label" for="ConfirmPassword">确认密码<span class="req">*</span></label>
+                    <div class="lx-input-icon">
+                        <span class="ico">@LXIcon.Check(18)</span>
+                        <input class="lx-input" type="password" id="ConfirmPassword" name="ConfirmPassword"
+                               placeholder="请再次输入密码" autocomplete="new-password" required minlength="6" />
+                    </div>
+                    <span class="lx-msg" id="pwdMatchMsg"></span>
+                </div>
+
+                <p class="lx-help mb-3">
+                    点击「立即注册」即表示同意 LX 优选商城的用户服务协议与隐私政策。
+                </p>
+
+                <button class="lx-btn lx-btn-primary lx-btn-block lx-btn-lg" type="submit">立即注册</button>
+            }
+
+            <div class="switch">
+                已经有账号了？<a href="@Url.Action("Login", "Member")">直接登录</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // 两次密码一致性提示（服务端仍会再次校验）
+        (function () {
+            var pwd = document.getElementById("Password");
+            var confirm = document.getElementById("ConfirmPassword");
+            var msg = document.getElementById("pwdMatchMsg");
+            if (!pwd || !confirm || !msg) return;
+
+            function check() {
+                if (!confirm.value) { msg.textContent = ""; return; }
+                var same = pwd.value === confirm.value;
+                msg.textContent = same ? "" : "两次输入的密码不一致";
+            }
+            pwd.addEventListener("input", check);
+            confirm.addEventListener("input", check);
+        })();
+    </script>
+}

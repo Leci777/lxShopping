@@ -1,0 +1,73 @@
+@model LXShopping.Models.PagerModel
+@*
+    通用分页条。页面上一般不用直接调这个，
+    用 @Html.LxPager(...) 那个帮助方法就行，它会自己转到这儿来。
+*@
+@{
+    var data = Model == null ? null : Model.Data;
+    if (data == null || data.PageCount <= 1)
+    {
+        return;
+    }
+
+    var action = ViewContext.RouteData.Values["action"] as string;
+    var controller = ViewContext.RouteData.Values["controller"] as string;
+
+    // 最多显示 5 个连续页码，并让它围绕当前页居中
+    var from = Math.Max(1, data.PageNumber - 2);
+    var to = Math.Min(data.PageCount, from + 4);
+    from = Math.Max(1, to - 4);
+}
+
+<div class="lx-pager">
+    @if (data.HasPreviousPage)
+    {
+        <a href="@Url.Action(action, controller, Model.ValuesFor(data.PageNumber - 1))" rel="prev">上一页</a>
+    }
+    else
+    {
+        <span class="disabled">上一页</span>
+    }
+
+    @if (from > 1)
+    {
+        <a href="@Url.Action(action, controller, Model.ValuesFor(1))">1</a>
+        if (from > 2)
+        {
+            <span class="gap">…</span>
+        }
+    }
+
+    @for (var i = from; i <= to; i++)
+    {
+        if (i == data.PageNumber)
+        {
+            <span class="cur">@i</span>
+        }
+        else
+        {
+            <a href="@Url.Action(action, controller, Model.ValuesFor(i))">@i</a>
+        }
+    }
+
+    @if (to < data.PageCount)
+    {
+        if (to < data.PageCount - 1)
+        {
+            <span class="gap">…</span>
+        }
+        <a href="@Url.Action(action, controller, Model.ValuesFor(data.PageCount))">@data.PageCount</a>
+    }
+
+    @if (data.HasNextPage)
+    {
+        <a href="@Url.Action(action, controller, Model.ValuesFor(data.PageNumber + 1))" rel="next">下一页</a>
+    }
+    else
+    {
+        <span class="disabled">下一页</span>
+    }
+</div>
+<div class="lx-pager-info">
+    共 @data.TotalItemCount 条记录，当前第 @data.PageNumber / @data.PageCount 页
+</div>
